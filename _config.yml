@@ -1,4 +1,5 @@
 name: Your New Jekyll Site
+url: http://kingzs70.github.io
 pygments: true
 auto: true
 permalink: /blog/:year/:month/:day/:title
