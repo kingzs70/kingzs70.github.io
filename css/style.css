@@ -148,7 +148,7 @@ dfn, cite, em, i {
 blockquote {
 	border-left : 3px solid #1E8AB6;
         background-color : #eee;
-	padding: 1em 1em 0.1em 1em;
+	padding: 1em;
         margin-bottom : 1.5em;
         font-size: 14px;
 }
@@ -805,6 +805,10 @@ ul.children .comment-author {
 	font-size: 12px;
 }
 
+
+.posts { margin:0; }
+.posts li { list-style:none; }
+
 /* =Layout
 ----------------------------------------------- */
 
@@ -920,7 +924,7 @@ h6 {
 }
 
 .site-main article {
-	padding: 10px 0 40px 0;
+	padding: 10px 0;
 	border-bottom: solid 1px #ddd;
 }
 

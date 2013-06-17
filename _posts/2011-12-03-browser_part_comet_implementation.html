@@ -1,0 +1,71 @@
+---
+layout: post
+title: comet长连接前端实现方法
+tags:
+- comet
+- JavaScript
+status: publish
+type: post
+published: true
+meta:
+  _wp_old_slug: comet%e9%95%bf%e8%bf%9e%e6%8e%a5%e5%89%8d%e7%ab%af%e5%ae%9e%e7%8e%b0%e6%96%b9%e6%b3%95
+  _edit_last: '1'
+  duoshuo_thread_id: '1310856454332219400'
+---
+<p>
+comet长连接是在网站上实现消息推送的主流方式。本文介绍前端实现comet长连接的一种方式。
+</p>
+<p>
+概括来说前端实现comet长连接唯一要做的一件事就是向服务器发送一条请求，接收到响应后处理响应并再发一条请求。很简单，但具体实现时要面临几个问题：
+</p>
+<ol>
+<li>跨域请求。comet服务器通常和站点服务器分开。请求至少要跨一个二级域。
+<li>浏览器忙碌状态。浏览器向服务器请求资源过程中，浏览器会进入忙碌状态。
+<li>无论网络环境怎样，必须一直保持且只保持一条连接。
+</ol>
+<!--more-->
+<h3><strong>跨域请求问题</strong></h3>
+<p>
+如果使用ajax方式发起请求，实现二级跨域最简单的方式就是引入一个iframe,在iframe中加载comet服务器上的一个页面，并把iframe的documentDomain设置为站点主域一致，然后在iframe中通过ajax向服务发请求。由于主域一致iframe可以操作父页面中的js。案例：搜狐微博。<a href="http://c7.t.sohu.com/index2.html?id=259773855">点击查看搜狐实现comet跨域请求的iframe页面</a>
+</p>
+<p>
+实现跨域请求的另一种方式就是<a href="http://en.wikipedia.org/wiki/JSONP">Json-p</a>。案例：新浪微博。
+</p>
+<h3><strong>防止浏览器进入忙碌状态</strong></h3>
+<p>
+直接在页面中加载任何资源，浏览器都会进入忙碌状态（loading图标会一直转），直到获得响应或超时。解决方案仍然是使用iframe。并再iframe的onload时发起请求，代码大概如下：
+[cc lang="javascript"]
+var d = document，
+	cometFrame = d.body.appendChild(d.createElement('iframe'))，
+	doc = cometFrame.contentWindow.document，
+	url = "http://comet.demo.url?cb={cb}&t={t}",
+	t = new Date().getTime(),
+	cb = 'parent.comet.callback',
+	seq = getSeq(),
+	content = '<body onload="var d=document,s=d.createElement(\'script\');s.src=\''
+		+url.replace(/{cb}/,cb+seq).replace(/{t}/,t)
+		+'\';d.getElementsByTagName(\'head\')[0].appendChild(s)">';
+cometFrame.style.cssText = "position:absolute;width:1px;height:1px;left:-100px;top:-100px;";
+doc.open().write(content);
+doc.close();//触发onload事件。
+[/cc]
+通过这种方式加载资源，浏览器不会进入忙碌状态。同时，也不需要单独创建一个iframe页面。更妙的是由于iframe是父页面自己创建的，所以iframe和父页面的js互操作没有任何限制。
+</p>
+<h3><strong>永远保持一条连接</strong></h3>
+<p>
+这里我们只考虑jsop-p的方式。意味这我们无法对请求有精细的控制，比如我们无法设置超时时间。</p>
+<p>
+由于无法保证网络时刻畅通。所以需要一种机制，保证浏览器和服务的comet连接永不中断。假设comet长连接最长保持60秒。最直接的解决方案就是，添加一个监控程序（setTimeout一段代码），61秒时检查响应是否返回。如果返回，则不做任何处理，如果没返回，则再发一个请求。但这又会引入一个问题，假设前一个请求在62时从服务器返回了，如果正常处理这个响应就会向服务器再发一个请求，造成同时保持多条长连接的情况。解决方案是为请求添加序列号，保证请求按照一个序列进行。</p>
+<p>一种方案是在请求中添加一个序列号字段比如 &seq=1。服务器收到请求后把这个字段原封不动返回。浏览器端通过seq字段判定这个响应是否有效。但这个方式比较麻烦。新浪微博使用了一种比较好的方式：每次发送jsonp请求，都提供一个不同的回调函数。相当于把seq字段在回调函数的名字中体现。比如，连续两个jsonp请求的回调函数可能是这样：<br />
+parent.comet.callback0<br />
+parent.comet.callback1</p>
+<p>当我们发起第二个请求时，将浏览器端的回调函数名字改为callback1，这样即便第一响应返回了也没有回调函数可以用。为了js不报错，需要为jsonp响应套上一个try-catch,比如
+[cc lang="javascript"]
+try(parent.comet.callback1({...}))catch(e){}
+[/cc]
+</p>
+
+<h3><strong>后记</strong></h3>
+<p>
+按照以上方式基本可以完美实现浏览器端comet长连接。唯一不足的地方是，无法解决opera浏览器忙碌状态的问题。另外opera浏览器请求默认超时时间是30秒。如果comet长连接超过30秒，在opera浏览器下也会出问题。
+</p>

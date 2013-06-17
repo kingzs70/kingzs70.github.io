@@ -1,0 +1,109 @@
+---
+layout: post
+title: 浏览器样式问题汇总
+tags:
+- CSS
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  duoshuo_thread_id: '1310856454332219405'
+---
+解决bug最好方式就是，在一开始就避免bug的出现。所以我们不仅需要知道解决的bug的方法，还需要知道造成这些bug的原因。
+
+<h2>1. 对css标准理解不周造成的Bug</h2>
+
+有些时候我们以为是bug问题，实际上是因为我们对css标准理解的不到位。
+
+外边距叠加问题。对于如下代码。<a href="http://kingzs70.sinaapp.com/demo/layout/margin-doublication.html" target="_blank">查看demo</a>
+
+[cc lang="css"]
+.wrong {margin:10px;background:#999;}
+.wrong p {margin:20px;background:red;}
+[/cc]
+
+[cc lang="html"]
+<div class="wrong">
+<p>wrong</p>
+</div>
+[/cc]
+<!--more-->
+最直观的理解，应该是这样的：
+<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wr.png"><img class="size-full wp-image-252 aligncenter" title="wr" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wr.png" alt="" width="452" height="74" /></a>
+
+
+但实际上却是：
+<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wrr.png"><img class="size-full wp-image-253 aligncenter" title="wrr" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wrr.png" alt="" width="463" height="43" /></a>
+
+理解这个问题，关键是要知道浏览器是如何计算div的高度的。</p>
+<blockquote>如果元素没有垂直边框或内边距，那么它的高度就是它包含的子元素的顶部和底部边框边缘之间的高度</blockquote>
+也就是p标签上的20边距实际上跑到了div的外面。要想达到目标效果只需要给外框加1px的padding.
+
+<h2>2. haslayout（拥有布局）引发的问题</h2>
+ie6浏览器的样式问题最多，而这些问题中有很多一部分都是与这个“haslayout”引起的。什么是“haslayout”
+<blockquote>
+IE浏览器利用layout的概念控制元素的尺寸和位置，只有那些“haslayout”的元素才负责自身及其元素的尺寸和位置的计算。如果一个元素没有“haslayout”，那么它的尺寸和位置由最近的拥有布局的祖先元素来控制
+</blockquote>
+默认情况下这些元素元素“haslayout”属性为true
+<ul>
+<li>html</li>
+<li>table, tr, td</li>
+<li>img</li>
+<li>h4</li>
+<li>input, select, textarea, button</li>
+<li>iframe, embed, object, applet</li>
+<li>marquee</li>
+</ul>
+以下CSS属性会是元素拥有布局
+<ul>
+<li>float:left,right</li>
+<li>display:inline-block</li>
+<li>width, height</li>
+<li>zoom</li>
+<li>writing-mode:tb-rl</li>
+</ul>
+ie7中以下属性也会触发布局
+<ul>
+<li>overflow:hidden, scroll, auto</li>
+<li>min-width: 任何值</li>
+<li>max-width: 除none以外的任何值</li>
+</ul>
+
+haslayout是许多样式问题的根源。标准浏览器是没有haslayout这个概念的，这也就导致了标准浏览器和ie在渲染页面上的差异性。有一种方式很糟糕的方式可以避免这个问题，那就是让所有元素都流动起来，这样ie和标准浏览器在页面渲染方面就一致很多。但这样至少会导致ie渲染页面的效率会下降很多，同样也会引入很多其他问题（马上会提到）。
+
+文字环绕问题。如果你想实现一个文字环绕图片的效果，如：
+<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/rrr.png"><img src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/rrr.png" alt="" title="rrr" width="400" height="257" class="aligncenter size-full wp-image-264" /></a>
+但由于某种原因，你给文字的p标签添加了zoom, overflow, min-width 等任何一种可以触发haslayout的属性。将会导致ie的某些版本出现问题。<a href="http://kingzs70.sinaapp.com/demo/layout/wenzihuanrao.html" target="_blank">查看demo</a>
+
+haslayout导致的另一个问题就是，拥有布局的元素在计算自己的尺寸时，与标准浏览器不同。<a href="http://kingzs70.sinaapp.com/demo/layout/widthbug.html" target="_blank">用IE6查看</a>
+
+其他问题：
+<ul>
+<li>拥有布局的元素不会收缩</li>
+<li>拥有布局的元素会自动清除浮动。这也就是为什么overflow:hidden在ie7以上可以清除浮动</li>
+<li>相对定位的元素没有布局</li>
+<li>拥有布局的元素外边距不会叠加</li>
+<li>在没有布局的块级连接上，单击区域只覆盖文字</li>
+<li>滚动时，列表项上的背景图片间歇性的显示和消失</li>
+</ul>
+这就是为什么，修复ie下的bug总是涉及通过设置某种属性迫使元素拥有布局。关于haslayout属性的详细介绍可以查看这篇文章<a href="http://www.satzansatz.de/cssd/onhavinglayout.html" target="_blank">http://www.satzansatz.de/cssd/onhavinglayout.html</a>。IE7修复了部分由haslayout引起的bug，但并没有完全解决。IE8采用全新的渲染引擎，貌似弃用了haslayout属性，解决了问题的根源。
+
+<h2>3. 与浮动有关的bug</h2>
+<h3>1. ie6的双边距bug。<a href="http://kingzs70.sinaapp.com/demo/bug/double-margin.html" target="_blank">IE6查看</a></h3>
+出现场景：具有水平边距的浮动元素，靠近容器浮动方向的边距会加倍
+基本解决方法：设置float的同时，设置display:inline.
+避免出现这个bug：不使用浮动布局，使用display:inline-block，布局。注意：ie6只有inline元素支持这个属性，其他元素设置这个属性只是触发haslayout属性。
+<h3>2. ie6的3像素文本偏移bug。<a href="http://kingzs70.sinaapp.com/demo/bug/3px.html" target="_blank">IE6查看</a></h3>
+出现场景：文本与一个浮动元素相邻时。
+基本解决方法：给浮动元素设置一个-3px的margin值。
+<h3>3. ie6的“藏猫猫”bug</h3>
+出现场景：一个浮动元素后面跟着一些非浮动元素，然后是一个清理元素，所有这些元素包含在一个设置了背景图片或颜色的元素中。如果清理元素碰到了浮动元素，那么中间的非浮动元素可能会消失，隐藏到了父亲元素的背景颜色或背景图后面，只有在刷新了页面后才重新出现。
+解决方法：不给父元素添加背景，或避免浮动元素与清除浮动元素相遇，或将浮动元素和父容器的position属性设置为relative
+<h3>4. ie6的重复字符问题</h3>
+现象：一系列浮动元素的最后一个元素的最后几个恶字符会在浮动元素下面重复出现。
+出现场景：当一系列浮动元素的之间有多个注释时
+解决方法：删除注释
+
+<h2>4. 与position:fixed&absolute有关的bug</h2>
+ie 6 7 position为fixed或absolute的元素将导致后面紧邻元素margin-top失效，解决方法是在fixed元素后面添加一个空标签，

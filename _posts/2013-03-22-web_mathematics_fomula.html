@@ -1,0 +1,59 @@
+---
+layout: post
+title: 在网页上使用数学公式的各种方法
+tags:
+- 未分类
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  _thumbnail_id: '311'
+  duoshuo_thread_id: '1310856454332219409'
+---
+在网页上使用数学公式并不是一件容易的事情，主要原因是数学公式的描述和排版都很复杂。
+以这个公式为例：
+
+<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2013/03/20130322223123.png"><img class="size-full wp-image-311" title="20130322223123" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2013/03/20130322223123.png" alt="1+\sqrt {x}+\dfrac {1+\tan \left( x\right) } {\sin \left( x\right) }" width="373" height="143" data-pinit="registered" /></a>
+
+目前，数学公式主要有如下几种描述方法：
+<!--more-->
+<h2>一. Latex</h2>
+<a href="http://baike.baidu.com/view/769333.htm" target="_blank">Latex</a>由美国计算机学家莱斯利·兰伯特（Leslie Lamport）在20世纪80年代初期开发的一套排版系统，在数学公式的描述和排版方便很出色。但缺点是语法过于复杂，很难使用。本科毕业时导师曾要求用Latex写论文，深受折磨。上面的公式，用latex表示方法如下：
+<pre>1+\sqrt {x}+\dfrac {1+\tan \left( x\right) } {\sin \left( x\right) }</pre>
+缺点是：可读性很差，对于大多数人来说不可能手写输入。
+优点是：功能强大，任何复杂公式都可以描述。
+Latex语法详见<a href="http://zh.wikipedia.org/wiki/Help:%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F" target="_blank">这里</a>
+<h2>二. Ascii Math Notation</h2>
+<a href="http://www1.chapman.edu/~jipsen/mathml/asciimath.html" target="_blank">Ascii Math Notation</a> 是一种直接使用Ascii字符描述数学公式的方式，可读性强，容易书写。最初也是源于国外数学学院，学生使用邮件讨论数学问题时的约定熟成的记法。
+对于上面的公式，用Ascii Math Notation可以描述为：
+<pre>1+sqrtx+(1+tan(x))/sin(x)</pre>
+优点是：适合手写输入，可读性很强。
+缺点是：功能有限。
+Ascii Math Notation 语法详见<a href="http://www1.chapman.edu/~jipsen/mathml/asciimathsyntax.html" target="_blank">这里</a>
+
+
+还有其他的描述方式：比如<a href="http://en.wikipedia.org/wiki/Eqn">eqn</a>，这个东西比TeX还老，更不好用。
+
+在网页上使用数学公式的另外一个问题就是，如何排版。
+<h2>方式一. 使用图片</h2>
+在服务器上把Latex字符串编译为图片，网页上直接使用。这是最基本的方法。缺点也很明显：性能差，不能编译拷贝，不易搜索。
+这里有一个在线生成公式图片网站 <a href="http://frog.isima.fr/bruno/share/tex2png/" target='_blank'>http://frog.isima.fr/bruno/share/tex2png/</a>
+国内的粉笔网使用的就是这种方式
+
+<h2>方式二. 使用MathML</h2>
+<a href="http://en.wikipedia.org/wiki/Mathml" >MathML</a> 是W3C推荐标准，使用XML描述和展现公式，目前只有Firefox浏览器支持，ie需要添加MathPlayer插件，webkit内核浏览器目前还没发现有支持的。由于兼容性太差，这种方式在生产环境无法使用。
+
+<h2>方式三. 使用HTML+css</h2>
+这种方式避免了以上两种方式的所有问题，直接使用HTML+css在网页上展现公式。缺点实现难度很大，尤其是对于复杂的公式的排版。<a href="http://www.mathjax.org/" target='_blank'>MathJax</a>提供了一个几乎完美的解决方案，可以在任何浏览器上渲染出优秀的公式，他的输入源支持Latex,AsciiMathNotation,MathML,输出支持HTML+css,MathML。MathJax也有一个问题就是代码需要在浏览器中运行，效率很低。它会针对不同浏览器渲染出不同的代码，也就意味着无法使用MathJax生成兼容所有浏览器的html代码。
+
+针对这个问题，一种解决方案就是“降级”。如果可以不用支持复杂公式，只支持基本公式，比如基础教育领域的公式，那么就可以提供一种降级的方案，在服务端或浏览器端把Latex串或Ascii Math Notation串编译为html代码，保存起来，以供重复查看。
+www.jyeoo.com使用的就是这种方式。
+
+另外一个开源项目是<a href="https://github.com/mathquill/mathquill" target="_blank">mathquill</a>，它是一个jquery插件，支持把latex渲染成纯html+css（没有图片）的公式。但不能够完美支持ie678。它的强大功能在，公式编辑器上，直接在网页上可视化编辑创建公式，支持命令输入。有很多网站使用这个项目，<a href="https://www.desmos.com" target="_blank">www.desmos.com</a>是其中之一。
+<h2>结论</h2>
+由以上可见，如果我们不要求支持复杂公式，那么最好的方式就是 Ascii Math Notation + HTML css 的方案。服务器存储Ascii Math Notation用于搜索，存储html代码用于展现。用户可以直接输入Ascii Math Notation，或者借助辅助工具。这种方式最大的难度就在Ascii Math Notation 与 HTML CSS 代码之间的双向转换上了。问题最终的难点还是在 Ascii Math Notation 的词法分析与语法分析。
+
+<h2>其他资源</h2>
+<a href="http://webdemo.visionobjects.com/equation.html?locale=zh_CN" target="_blank">手写公式模式识别</a>
+<a href="http://www.codecogs.com/latex/eqneditor.php" target="_blank">Latex在线公式编辑器</a>

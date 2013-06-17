@@ -1,0 +1,167 @@
+---
+layout: post
+title: 利用AjaxModel提高js代码的可维护性
+tags:
+- Ajax
+- JavaScript
+- 可测性
+- 可维护性
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  _thumbnail_id: '285'
+  duoshuo_thread_id: '1310856454332219396'
+---
+<p class='entry-abstract'>
+<a href="http://kingzs70.sinaapp.com/2011/09/29/simplify-ajax-code-with-ajaxmodel/"><img src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/09/simplify-ajax-code-with-ajaxmodel.gif" alt="用AjaxModel简化你的Ajax代码" title="simplify-ajax-code-with-ajaxmodel" width="300" height="285" class="alignleft size-full wp-image-77" /></a>基于jQuery，tangram等框架进行Ajax编程是一件很容易的事。以下面的“添加删除标签”为例，要实现“添加标签”这一功能，如示例代码所示，你只需要几十行代码。但这样的编程模式仍然过于复杂，而且对于需要长期维护网站来说，存在很多问题，这些问题包括：代码冗余率高，可读性差，难以测试，难以维护等。AjaxModel的设计目标就是进一步降低Ajax编程的复杂度，解决代码的<strong>可维护性</strong>与<strong>可测试性</strong>问题。本文通过重构”添加标签”的示例代码，展示如何使用AjaxModel来简化Ajax编程。 
+</p>
+<!--more-->
+<p>
+<h2>本文要考虑的场景</h2>
+<strong class='demo-title'>“添加、删除标签”</strong><a class='open-in-new-window' href='http://kingzs70.sinaapp.com/demo/tag/index.html' target='_blank' >在新页面中查看</a>
+<iframe frameBorder='0' class='demo-container' src='http://kingzs70.sinaapp.com/demo/tag/index.html'>
+</iframe>
+</p>
+<p>
+<h2>待重构的代码</h2>
+假设ajax响应格式为 [cc inline='true' lang='javascript']{ 'status':xx, 'msg':xx, 'data':xx }[/cc] status==0 代表成功，其他值代表错误代码。以<strong>“添加标签”</strong>为例，一种简单、直接、容易理解的实现方式，可能是这样：<br />
+
+<span class='unimportent'>注：示例代码使用的是<a href='http://tangram.baidu.com'>tangram</a>框架。</span>
+[cc lang='javascript']
+T.event.on(T.dom.g('addTagBtn'), 'click', function(){
+    var tagname = T.dom.g('tagNameInput').value;
+    tagname = T.string.trim(tagname);
+    if (tagname != "") {
+        T.ajax.request(
+			VAR.TAG_ADD_URL,
+			{
+				data : "name="+tagname,
+				onsuccess : function (xhr,result) {
+					try {
+						result = $.parseJSON(result);
+					} catch (e) {
+						result = { status:1, msg:'json数据格式解析错误'};
+					}
+					if (result.status === 0){
+						var tag = document.createElement('a');
+						tag.id = result.data.id;
+						tag.href = '#';
+						tag.innerHTML = tagname + '<span>删除</span>';
+						T.dom.g('tagContainer').appendChild(tag);
+					} else {
+						alert(result.msg);
+					}
+				} ,
+				onfailure : function () {alert('系统或网络错误！')}
+			}
+		);
+    } else {
+        alert('请输入标签名');
+    }
+});
+[/cc]
+</p>
+<h2>以上代码的问题</h2>
+<p>
+以上代码描述了一种典型的ajax编程模式，它将功能相关的代码都集中在一起，很容易理解。对于小型网站，比如只有几个页面，以上代码完全可以胜任。但是对于大型网站，尤其是那些需要长期维护的网站，以上代码就有很多问题。具体来说：
+<ol>
+<li>一段代码承担了过多的职责。具体包括：1.绑定事件。2.处理ajax响应。3发起ajax请求。<strong>"单一职责"</strong>是面向对象分析设计的基本原则之一。满足<strong>"单一职责"</strong>的代码意味着更低的耦合度。</li>
+<li>代码没法复用，原因还是耦合度太高。以上代码的9~25行中只有16~20这5行是特殊的。其他代码都可以在不同ajax请求中复用。</li>
+<li>代码没法测试。所逻辑都混在一起，没有办法进行独立测试。如果后端工程师想测试自己Ajax接口，只能等前端把页面写好，或自己另起炉灶，单独写测试代码</li>
+</ol>
+如果你认为以上几点不是什么大问题，那么请考虑如下场景：
+</p>
+<blockquote>
+用户反映错误提示信息的弹出窗实在太丑了，要求将所有alert升级为自定义的dialog。"系统或网络错误"这句话也不够友好，要求改为"Sorry,系统或网络错误~".
+</blockquote>
+<p>
+对于这一需求，如果按照上面的编程方式，你需要把每一个页面都修改一遍，很容易引入bug。
+</p>
+<p>
+下面我们用AjaxModel重构上面的代码。
+</p>
+<h2>用AjaxModel重构后的代码</h2>
+[cc lang='javascript' highlight='7-9,27-34']
+//将所有事件处理函数组织在一起，
+//并统一命名为 on + ElementId + 事件名
+var eventHandlers = {
+	onAddTagBtnClick : function (e) {
+		var tagName = T.string.trim(T.g('tagNameInput').value）;
+		if (tagName != '') {
+			tagModel.add({
+				tagname : tagName
+			});
+		} else {
+			alert('请输入标签名');
+		}
+	}
+};
+//将所有ajax响应成功的处理函数组织在一起
+//并统一命名为 on + ajax请求方法名 + Success
+var ajaxSuccessHandlers = {
+	onAddSuccess : function (data) {
+		var tag = document.createElement('a');
+		tag.setAttribute('id',data.id);
+		tag.setAttribute('href','#');
+		tag.innerHTML = data.tagname + "<span>删除</span>";
+		T.g('tagContainer').appendChild(tag);
+	}
+};
+//将所有ajax请求组织在一起，封装为model对象。
+var tagModel = new AjaxModel({
+	methods : {
+		add : {
+			url : VAR.TAG_ADD_URL,
+			onSuccess : ajaxSuccessHandlers.onAddSuccess
+		}
+	}
+});
+//完成事件绑定
+(function bindEvent() {
+	var on = T.event.on,
+		g = T.g;
+	on(g('addTagBtn'),'click',eventHandlers.onAddTagBtnClick);
+})();
+[/cc]
+<p>
+<strong>重构后的代码满足"单一职责"原则。</strong>我们可以按照其职责来命名对象或函数。良好的命名保证了代码的<strong>可读性</strong>。有位牛人曾说过：<strong>"一份可以直接阅读代码，远远胜过面面俱到的文档"</strong>。
+</p>
+<p>
+<strong>重构后的代码几乎没有重复。</strong>我们已经看不到ajax请求的逻辑，和那些重复的错误处理函数。向服务器发起请求，添加标签的代码实际上只有7,8,9这三行，而tagModel的定义只用了27~34这8行。定义中我们只是告诉AjaxModel构造器：<em>“给我创建一个model对象，它有一个名叫 add 的方法，这个方法向 VAR.TAG_ADD_URL 发起请求，请求成功(result.status == 0)后执行 ajaxSuccessHandlers.onAddSuccess 这个方法”</em>。处理请求失败的逻辑已经封装在了AjaxModel中。
+</p>
+<h2>使用AjaxModel带来了哪些好处</h2>
+<p>
+一. AjaxModel带来的最重要的好处就是增强代码的<strong>可维护性</strong>。具体来说，它加强了代码的<strong>可读性</strong>，这对于后来的维护人员来说尤为重要，如果你有过为了添加一个功能去修改别人写的上千行的js代码的经历就会明白我在说什么。其次重构后的代码更容易更容易扩展。这里我们举一个更具体的例子，假设现在新增如下需求：
+</p>
+<blockquote>
+添加“Ajax请求正在处理”的提示信息。具体来说在请求开始时在“我的标签”后面显示Ajax-loading图片，在请求结束时将它隐藏。
+</blockquote>
+<p>
+为了实现这个需求。我们只需要在tagModel的定义中添加如下所示的高亮代码：
+[cc lang='javascript' highlight='2-7']
+var tagModel = new AjaxModel({
+	onRequestBegin : function () {
+		T.g('AjaxModelProcessing').style.visibility = 'visible';
+	},
+	onRequestEnd : function () {
+		T.g('AjaxModelProcessing').style.visibility = 'hidden';
+	}
+	methods = {
+		add = {
+			url : VAR.TAG_ADD_URL,
+			onSuccess : ajaxSuccessHandlers.onAddSuccess
+		}
+	}
+});
+[/cc]
+然后在html文件中“我的标签”后面以“AjaxModelProcessing”为id添加一个Ajax-loading图片。这就是你需要的全部改动，而且这些都是改动都是添加性的改动，对原有代码没有做任何修改。也就是面向对象中所谓的<strong>"向添加开发，向修改关闭"</strong>的<strong>开放关闭原则</strong>。由于loading图片是一个如此常用的功能，实际上AjaxModel已经对其进行了封装。你只需要在html文件内适合的位置插入一个图片就可以使用这个功能了。
+<p>二. 另一个好处就是代码可分层测试了。对于后端ajax接口的测试，只需测model对象。对于前端页面的测试，只要保证model有正确的行为，就可以只测试前端其他代码。进而带来的影响是<strong>前端和后端开发人员可以独立的进行自己的工作</strong>。假设后端工程师已经完成了服务端ajax接口的编程，而前端工程师还没有把页面写好。后端工程师只需要在站点下随便创建一个页面，在页面中定义一个tagModel对象。然后在firebug console中运行如下代码[cc inline='true' lang='javascript']tagModel.add({ tagname : 'kingzs70'})[/cc] 就可以测试接口是否正确。你也可以在示例页面中用firebug运行这行代码试试，看看"kingzs70"这个标签是否添加成功。相反，如果前端工程师先写好了页面，而后端接口还没有写好，他只需要用MockAjaxModel替换AjaxModel去测试自己的页面，等候后端接口开发后改回AjaxModel。这里的MockAjaxModel可以模拟AjaxModel的行为，但无需与服务器进行通信。这也是MVC框架分层测试中普遍采用的手段，用Mock对象模拟下层对象来对上层对象进行。如何定义MockAjaxModel的行为，就看测试的需求了。</p>
+</p>
+<h2>后记</h2>
+<p>AjaxModel尝试解决的核心问题就是增加代码的可维护性。但“可维护性”与“性能”通常来说是矛盾的，增加可维护性，意味着牺牲一定的性能。tagModel在初始化时要消耗一定时间，同时也要占用一定的内存，但相对于它带来的<strong>“可维护性”</strong>方面的好处，这点牺牲是值得的。</p>
+<p>同时，由于代码粒度更小，层次更清晰，一定程度上也增加了代码的可测试性</p>
+<p>AjaxModel借鉴了MVC的思想，但没有完全照搬，它并没有使用controler,render,view这些概念。因为如果我们不是在构建一个复杂的web应用，而仅仅是为了改善页面的用户体验而使用Ajax，就没有必要去使用一个MVC框架。</p>
+<p>本文主要介绍AjaxModel的使用场景、要解决的问题。关于AjaxModel详细的使用文本档和源码分析请直接查看它的<a href='http://sharedemo.sinaapp.com/view/shared/js/AjaxModel.js' target='_blank'>源文件</a></p>
+<p>"添加、删除标签"示例的源码请到页面中直接<a href='http://sharedemo.sinaapp.com/view/tag' title='AjaxModel Demo | kingzs70' target='_blank'>查看</a><p>

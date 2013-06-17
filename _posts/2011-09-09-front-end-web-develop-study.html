@@ -1,0 +1,75 @@
+---
+layout: post
+title: web前端开发学习经验总结
+tags:
+- CSS
+- JavaScript
+- 总结
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  _wp_old_slug: welcome-to-my-blo
+  duoshuo_thread_id: '1310856454332219393'
+---
+<div>
+<blockquote>开博第一篇文章。谨以此文祭奠大学逝去的时光。</blockquote>
+web开发大概分为前台和后端，前台又可以分为美工，交互设计，js编程。后端了解不多，前端的话，可以按如下思路系统学习：
+
+<strong>基础知识：</strong>
+
+<strong></strong>1. html + css。这部分建议在 www.w3school.com.cn 上学习，边学边练，每章后还有小测试。之后可以模仿一些网站做些页面。在实践中积累了一些经验后，可以系统的读一两本书，推荐《head first html 与 css 中文版》，不过这本书讲的太细了，我没能拿出耐心细读。
+
+2. javascript。 要学的内容实在很多，如果没有其他编程语言的基础的话，学起来可能要费些力，还是建议先在 w3school上学习。之后建议马上看《javascript语言精粹》，js是一门很混乱的语言，这本书能够帮助你区分哪些是语言的精华，哪些是糟 粕，对于语言精华，应该深入学习。糟粕部分能看懂别人写的代码就行，自己就不用尝试了。
+
+<strong>进阶：
+</strong>
+<!--more-->
+有了以上基础，就可以进行一般的静态网页设计，不过对于复杂的页面还学进一步学习。
+
+CSS。必看《精通css》，看完这本书你应该对：盒子模型，流动，block，inline，层叠，样式优先级，等概念非常了解了。作为练习可以看下《css艺门之匠》这本书，它对标题，背景，圆角，导航条，table，表单等主题都有详细的介绍。
+
+Javascript。上面提到内容还不足以让你胜任js编程。在有了基础之后，进一步学习内容包括：
+<ol>
+	<li style="text-align: left;">框架。推荐jQuery，简单易用，我的第一web项目就是在w3school简单学习后，直接上手jQuery完成的，真的很难简单，很好用。但 jQuery适用环境有限，对于那些对性能要求很高的页面无法胜任。推荐了解一下 YUI 或百度的 tangram ，都很好用，学习方法也很简单，照着产品文档做几个页面就行了，不用面面俱到，以后遇到问题查文档就行了。框架可以帮你屏蔽浏览器的差异性，让你能更专注 与web开发学习的精髓部分。</li>
+	<li style="text-align: left;">javascript 语言范式 。这个名字可能并不恰当，只是我找不到可以描述“面向对象”，“函数式”这个两个概念的概念。javascript不完全是一个面向对象的语言，它的很多 设计理念都有函数编程语言的影子，甚至说如果你不用面向对象，完全可以把它理解成一门函数式编程语言。javascript的很多语言特性，都是因为他具 有函数是语言的特点才存在的。这部分推荐先学习面向对象的基本理论，对封装，继承，多态等概念要理解，维基百科，百度百科会是你的帮手，另外推荐 《object oriented javascript》，应该有中文版。对与函数式编程我了解的也不系统，不好多说。</li>
+	<li style="text-align: left;">javascript 语言内部机制。必须弄清如下概念：js中变量的作用域，变量传递方式，函数的定义环境与执行环境，闭包，函数的四种调用方式（一般函数，对象的方 法，apply，call），以及四种调用方式下，‘this'指向的是谁。这部分内容你会在《javascript语言精粹》中详细了解。另外，你必须 理解json。</li>
+	<li style="text-align: left;">dom编程，这个web前端工程师的核心技能之一。必读《Javascript Dom编程艺术》，另外《高性能javascript》这本书中关于dom编程的部分讲的也很好。</li>
+	<li style="text-align: left;">ajax编程，这是另一核心技术。ajax建议在网上查些资料，了解这个概念的来龙去脉，百度百科，维基百科上的内容就足够了。真正编程是很容易的，如今几乎所有框架都对ajax有良好的封装，编程并不复杂。</li>
+	<li style="text-align: left;">了解浏览器差异性。这部分包括css和js两部分，浏览器差异内容很多，建议在实践中多多积累。另外对于浏览器的渲染模式，DOCTYPE等内容应该系统学习。</li>
+</ol>
+<strong>再进一阶：</strong>
+
+有了以上知识，对于大多数小型网站，你应该已经可以写出能够工作的代码了。但写出可以运行的代码，只是编程的最初级阶段。更高要求大概还有三方面：1易维护，2可测试，3高性能，如果页面流量有要求，那第四个就是低流量。
+<ol>
+	<li>易维护。对于页面你该理解‘样式’，‘数据’，‘行为’三者分离，对应的当然就是css,html,js。对于js代码，你最好了解设计模式，重构，MVC等内容。</li>
+	<li>可测性。js代码可测性的主题，我正在研究，欢迎感兴趣的同学联系我，共同学习。</li>
+	<li>高性能。必读《高性能javascript》。</li>
+	<li>低流量。技巧性太强，非一朝一夕之功，不多说</li>
+</ol>
+<strong>补充：</strong>
+
+对于前段开发，核心部分基本就这些了，可以根据自己的兴趣爱好选择性学习以下内容。
+<ol>
+	<li>美工。 大公司都有专业的美工人员，不过如果爱好也可以了解。推荐《写给大家看的设计书》。</li>
+	<li>交互设计。大公司依然有专业人士搞这些，不过如果爱好也可了解。推荐《简约至上》。</li>
+	<li>后端。前段工程师必须至少了解一门后端语言，不过如果爱好也可深入学习，入手难度比较低的应该是php了。这部分又可分为基于页面，基于框架两种。大型项 目都是基于框架开发的，建议至少了解一个MVC框架，php的zend，asp.net 的 asp.net mvc等等太多了，好还框架的设计思想都大同小异。</li>
+	<li>flash。我并没有把flash作为前端工程的核心技能之一，因为我不会，不过ActionScript应该和js没有太大区别，可以根据工作需要学 习。不过我的原则是能不用就不用，其实很多效果通过js，css都可以实现，完全不需要flash。而且随着html5的发展flash早晚会淘汰。</li>
+	<li>html5和css3 。html5的标准到现在还没有正式发布，不过目前几乎所有新的浏览器都已经开始支持，手机上就更是如此，建议学习，很好，很强大。</li>
+</ol>
+前端开发需要学习的内容很多很杂。美工，交互设计，flash，js，html+css，后端，随便哪种技能，如果学的特别牛，都可以保证你拥有一个职业。想通吃，没个几年怕是不成。关键是选准自己的爱好，深入学习一项，面要铺开，但深度更重要。
+
+推荐书目一览：
+<ul>
+	<li><a href="http://book.douban.com/subject/3040870/" target="_blank">《head first html 与 css 中文版》</a></li>
+	<li><a href="http://book.douban.com/subject/3590768/" target="_blank">《javascript语言精粹》</a></li>
+	<li><a href="http://book.douban.com/subject/4736167/" target="_blank">《精通css》</a></li>
+	<li><a href="http://book.douban.com/subject/3245901/" target="_blank">《css艺门之匠》</a></li>
+	<li><a href="http://book.douban.com/subject/3182419/" target="_blank">《object oriented javascript》</a></li>
+	<li><a href="http://book.douban.com/subject/6038371/" target="_blank">《Javascript Dom编程艺术》</a></li>
+	<li style="text-align: left;"><a href="http://book.douban.com/subject/5362856/" target="_blank">《高性能javascript》</a></li>
+	<li><a href="http://book.douban.com/subject/3323633/" target="_blank">《写给大家看的设计书》</a></li>
+	<li><a href="http://book.douban.com/subject/5394309/" target="_blank">《简约至上》</a></li>
+</ul>
+</div>

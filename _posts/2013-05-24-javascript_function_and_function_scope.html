@@ -1,0 +1,133 @@
+---
+layout: post
+title: JavaScript函数与函数作用域
+tags:
+- JavaScript
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  duoshuo_thread_id: '1310856454332219417'
+---
+<blockquote>昨天问了自己一个问题：究竟是应该把一个小的领域研究透彻，成为专家，还是应该在横向上不断拓展的自己的知识面，成为所谓的复合型人才。过去我一直认为后者是对的。现在发现，只有那些在某一领域真正成为专家的人，才有资格在横向上拓展自己。否则你给人的印象只能是浮躁，虽然什么都能做，但没有一项能做到极致。引发我这个思考的是两个JavaScript问题：</blockquote>
+
+问题一：如下两次alert的输出是什么？
+
+[cc lang="javascript"]
+var a = 1;
+function func(){
+  alert(a);
+  var a = 2;
+  alert(a);
+}
+func();
+[/cc]
+
+问题二：如下alert的输出依次是什么？
+
+[cc lang="javascript"]
+function func(){
+  alert(1);
+}
+func();
+var func = function(){
+  alert(2);
+}
+func();
+function func(){
+  alert(3);
+}
+func();
+[/cc]
+<!--more-->
+<h3>理解问题一</h3>
+
+函数每次运行都会创建一个作用域（scope），这个作用域内会定义有一个arguments属性，用于记录函数参数；同时，这个作用域内还会记录着函数体内声明的变量，在赋值语句运行前这个变量已经存在，但其值是undefined。所以对于问题一，第一次alert时，访问的变量a是函数func作用域内的a，而不是全局作用域内的a。但a还没有被赋值，所以alert出来的是undefined。第二次alert，由于a已经被赋值，所以alert出来的“2”。
+
+理解这个问题，还有一点就是必须理解JavaScript变量的查询方式，或者说是，函数作用域的继承方式。任何一个函数都被定义在一个作用域中，最基本的就是全局作用域，可以通过window对象访问这个作用域内的变量。假设在全局作用内定义函数 "func", 当func运行时会创建一个局部作用域，姑且称之为 func_score ;在 func_score 内，还可以定义内部函数 func_in，当func_in运行时，又会创建一个 func_in_scope。这样就形成了一个作用域链 window => func_score => func_in_score 。函数内变量的查找是沿着这条作用域链依次向外查找的，直到抵达window对象。
+
+最后，JavaScript代码在运行前会有一个解析的过程（具体是在什么时候完成解析，可能各个解析引擎的处理机制不一样，需要调研）。在解析时，会完成变量的声明。正因为此，问题一中，第一次alert(a)时，虽然a还没有被赋值，但已经存在于函数作用域内，在这个作用域内已经无法通过 “a” 这个标示符访问全局变量中的 a，除非使用 window.a。
+
+总结。如何写出高性能的JavaScript代码？问题一给出了两个方向：
+1. 合理控制函数作用域，尽可能保证一个函数运行完成后作用域能被释放，避免闭包的产生。
+2. 避免作用的层级过多，如果全局作用域内的一个变量需要在局部作用内被多次访问，应该在局部作用域内定义一个变量指向全局作用内的变量。这样可以避免在作用域上查找变量的时间消耗。
+
+<h3>理解问题二</h3>
+
+首先要理解的问题是：JavaScript函数有几种定义方式，每种方式有什么区别。
+方法1：函数声明
+[cc lang="javascript"]
+function add(x, y) {
+  return x + y;
+}
+[/cc]
+方法2：函数表达式，使用匿名函数
+[cc lang="javascript"]
+var add = function (x, y) {
+  return x + y;
+}
+[/cc]
+方法3：函数表达式，提供函数名
+[cc lang="javascript"]
+var add = function other_add(x, y) {
+  return x + y
+}
+[/cc]
+方法4: 函数构造器
+[cc lang="javascript"]
+var func = new Function("x", "y", "return x + y")
+[/cc]
+
+使用“方法1：函数声明”定义函数时，会同时在函数所在作用域内创建一个与函数名相同的变量 add 。变量add指向 函数对象function add(){...}。以这种方式定义函数，在函数定以前就可以使用，也就是说如下代码是正确的：
+[cc lang="javascript"]
+var a = add(1,2);
+function add(x, y) {
+  return x + y;
+}
+[/cc]
+原因是函数对象（function add(){...}）是在代码解析时创建的，变量add与函数对象一同被创建。
+读到这里，已经可以确定问题二中第一个alert输出的是“3”。因为func最后一次被解析出来的内容是function func(){alert(3)}，也就是在 func() 第一次运行时 变量func 指向的第三个函数对象。
+
+“方法2：函数表达式，使用匿名函数” 与方法一的区别在于：方法2定义的函数是在运行时创建的，如果函数调用先于函数定义就会报错，下面的代码就是<span style="color:red">错误的</span>
+[cc lang="javascript"]
+var a = add(1,2);
+var add = function (x, y) {
+  return x + y;
+}
+[/cc]
+读到这里，可以已经可以确定问题二中第二个和第三alert输出的都是2。因为变量func在第5行是被重新定义，指向了第二个函数。在后面的代码中，func并没有被重新定义。第三个函数是在解析时完成定义的，而非运行时。
+
+"方法3：函数表达式，提供函数名"与方法2基本相似，需要注意的是 “other_add” 并不是一个变量，它仅仅是函数对象的名字。这个名字并没有以变量的形式定义在函数所在作用域中，而是被定义在了，函数自身的作用域中。如下代码可以验证这一点：
+[cc lang="javascript"]
+var add = function other_add(x, y) {
+  alert(typeof other_add);
+  return x + y
+}
+add(1,2); //alert function
+alert(typeof other_add); //alert undefined
+[/cc]
+
+"方法4: 函数构造器"。函数也是对象，也存在对应的构造器方法。需要注意的问题：以这种方式定义的函数，只能继承window作用域。也就是说函数体中变量最多可以向外查找到window作用域内的变量。下面代码可以验证这一点。
+[cc lang="javascript"]
+var a = "out";
+function in_score(){
+  var a = "in";
+  var func = new Function("alert(a)")
+  func();
+}
+in_score();//alert "out"
+[/cc]
+
+总结。如何写出可维护的JavaScript代码？问题二给出了两个方向：
+1. 合理控制变量名与函数名，避免作用内或以及跨作用域的命名冲突。
+2. 明白哪些代码是在运行时执行的，哪些不是。
+
+<h3>尾记</h3>
+写出可以工作的JavaScript代码并不难。难的是写出高性能、高可维护的代码。我还有很长的路要走。希望这篇文章对后来人有帮助。
+
+<h3>参考</h3>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Functions_and_function_scope">Functions and function scope</a></li>
+<li><a href="http://book.douban.com/subject/5362856/">《高性能JavaScript》</a></li>
+</ul>

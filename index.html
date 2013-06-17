@@ -1,13 +1,12 @@
 ---
 layout: default
-title: Your New Jekyll Site
+title:  张帅 - 宁精勿杂，宁专勿多
 ---
 
 <div id="home">
-  <h1>Blog Posts</h1>
   <ul class="posts">
     {% for post in site.posts %}
-      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+      <li><h2><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></h2></li>
     {% endfor %}
   </ul>
 </div>

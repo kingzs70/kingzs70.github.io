@@ -1,0 +1,372 @@
+---
+layout: post
+title: '[译]大规模JavaScript应用架构模式(二）'
+tags:
+- JavaScript
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  duoshuo_thread_id: '1310856454332219403'
+---
+<div>前一篇：<a href="http://kingzs70.sinaapp.com/2011/12/07/large_scale_javascript_webapp_architecture_pattern_1">[译]大规模JavaScript应用架构（一）</a></div>
+<div class="catalog">本节目录
+<ul>
+	<li>模块（Module）理论
+<ul>
+	<li>高层次的总结</li>
+	<li>模块模式</li>
+	<li>对象直接量</li>
+	<li>CommonJS模块</li>
+</ul>
+</li>
+	<li>外观模式</li>
+	<li>中介者模式</li>
+</ul>
+</div>
+<h1>模块理论</h1>
+你可能已经在你的架构中使用过模块。如果没有，这一节会对模块进行基础系性的介绍。
+<blockquote>模块是任何鲁棒的应用架构不可缺少的一部分，并且是大系统中职责单一且可替换的部分。</blockquote>
+依赖于如何实现模块，可能通过定义模块间的依赖关系，在加载一个模块时自动将依赖的模块加载进来。相对于跟踪模块间的依赖的关系，然后手动加载相关模块，或者插入script标签，这种模式更加可扩展。
+
+<!--more-->
+
+任何大型系统都应该从模块化的组件基础上构建。回到Gmail的例子，你可以把模块想象为互相不依赖的功能点，它们可以独立的存在，如“聊天”模块。根据一个功能点的复杂程度，他可能依赖一些子模块，比如“聊天”模块可能依赖于一个处理“表情符号 -:)”的子模块，这个子模块也可以在邮件模块中使用。
+<blockquote>我们讨论的架构中，模块对于系统其他部分是什么样的了解非常有限。取而代之的是，我们通过外观模式把这个职责委托给中介者</blockquote>
+这样设计是因为，如果一个模块只需要通知系统特定的事件发生了，而不用关心是否有其他模块在运行，那么这个系统便可以支持在不影响其他模块的情况下添加、移除、替换一个模块。
+
+为了达到这样的目标松耦合非常重要。它通过移除代码间的依赖关系来增加模块的可维护性。在我们的例子中，模块的正常工作不应该依赖于其他模块。当松耦合被恰当的实现，我们可以直接的观察到变化是如何从一个模块影响到另一个模块的。
+
+在JavaScript世界里，有许多实现模块的方案，包括“模块模式（module pattern）”和对象直接量。有经验的开发这可能已经熟悉这些，如果是，请跳过本节。
+<h1>模块模式（Module Pattern）</h1>
+模块模式是一个著名的设计模式，它利用闭包封装“隐私（privacy）”，状态和结构。它提供了一种方法来封装public和private方法、变量，保证代码不污染全局命名空间，进而避免造成命名冲突。使用这个模式，只有public接口才会被返回，其他的一切都被封装在闭包内。
+
+它提供了一个干净的解决方案，来封装你复杂的逻辑代码，只对外公开系统中其他模块需要的接口。这个模式与自运行函数（immediately-invoked function expression）非常相似，除了返回的是一个object而不是一个function。
+
+需要注意的是这不是一个真正的“privacy”保护机制，因为，不像其他语言，JavaScript没有内建的访问控制。变量无法被声明为public或private，所以我们使用函数作用域来模拟访问控制的机制。利用模块模式，因为有闭包，变量或者方法只对模块自身可用。在返回对象中定义的方法和变量可以被外部访问。
+
+下面是一个使用模块模式实现的购物车模块。模块自身完全是自我包含于一个叫做basketModule的全局对象中。模块中basket数组是私有的，所以应用的其他代码是无法直接访问它的。它只存在于模块的闭包内。所以，唯一能够访问它的就是在闭包内定义的函数（addItem(), getItem(), etc）。
+
+[cc lang="javascript"]
+var basketModule = (function() {
+  var basket = []; //private
+  return { //exposed to public
+    addItem: function(values) {
+      basket.push(values);
+    },
+    getItemCount: function() {
+      return basket.length;
+    },
+    getTotal: function(){
+      var q = this.getItemCount(),p=0;
+      while(q--){
+        p+= basket[q].price;
+      }
+      return p;
+    }
+  }
+}());
+
+[/cc]
+
+在模块内部，你可能注意到我们返回了一个object。它被自动付给basketModule。所以你可以通过如下方式与它交互：
+
+[cc lang="javascript"]
+//basketModule is an object with properties which can also be methods
+basketModule.addItem({item:'bread',price:0.5});
+basketModule.addItem({item:'butter',price:0.3});
+
+console.log(basketModule.getItemCount());
+console.log(basketModule.getTotal());
+
+//however, the following will not work:
+console.log(basketModule.basket);// (undefined as not inside the returned object)
+console.log(basket); //(only exists within the scope of the closure)
+
+[/cc]
+
+上面的方法都被高效的组织在basketModule命名空间下。
+<h1>一些框架是如何实现模块模式的？</h1>
+<div>Dojo</div>
+Dojo通过 dojo.declare，尝试提供一个类似于”class”的机制。比如，如果我们想在store命名空间上声明一个basket模块，可以通过如下方式：
+
+[cc lang="javascript"]
+//traditional way
+var store = window.store || {};
+store.basket = store.basket || {};
+
+//using dojo.setObject
+dojo.setObject("store.basket.object", (function() {
+  var basket = [];
+  function privateMethod() {
+    console.log(basket);
+  }
+  return {
+    publicMethod: function(){
+      privateMethod();
+    }
+  };
+}()));
+
+[/cc]
+<div>jQuery</div>
+jQuery有很多方式实现模块模式。
+
+下面的例子中，定义了一个library函数，它声明了一个新的library并且自动绑定了init方法到document.ready。
+
+[cc lang="javascript"]
+function library(module) {
+  $(function() {
+    if (module.init) {
+      module.init();
+    }
+  });
+  return module;
+}
+
+var myLibrary = library(function() {
+  return {
+    init: function() {
+    /*implementation*/
+    }
+  };
+}());
+
+[/cc]
+<div class="related-reading">相关阅读
+<ul>
+	<li><a href="http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth">Ben Cherry - The Module Pattern In-Depth</a></li>
+	<li><a href="http://lanyrd.com/2011/jsconf/sfgdk/">John Hann - The Future Is Modules, Not Frameworks</a></li>
+	<li><a href="https://gist.github.com/274388">Nathan Smith - A Module pattern aliased window and document gist</a></li>
+	<li><a href="http://blog.davidlitmark.com/post/6009004931/an-introduction-to-the-revealing-module-pattern">David Litmark - An Introduction To The Revealing Module Pattern</a></li>
+</ul>
+</div>
+<h1>对象直接量</h1>
+在对象直接量注释法，一个对象被描述为一系列被包含在大括号内，且由逗号隔开的键/值对。
+
+模块模式在很多时候都很有用，但如果你发现自己没有什么需要隐藏的变量或方法，使用对象直接量可能更方便。
+
+[cc lang="javascript"]
+var myModule = {
+  myProperty : 'someValue',
+  //object literals can contain properties and methods.
+  //here, another object is defined for configuration
+  //purposes:
+  myConfig:{
+    useCaching:true,
+    language: 'en'
+  },
+  //a very basic method
+  myMethod: function(){
+    console.log('I can haz functionality?');
+  },
+  //output a value based on current configuration
+  myMethod2: function(){
+    console.log('Caching is:' + (this.myConfig.useCaching)?'enabled':'disabled');
+  },
+  //override the current configuration
+  myMethod3: function(newConfig){
+    if(typeof newConfig == 'object'){
+      this.myConfig = newConfig;
+      console.log(this.myConfig.language);
+    }
+  }
+};
+
+myModule.myMethod(); //I can haz functionality
+myModule.myMethod2(); //outputs enabled
+myModule.myMethod3({language:'fr',useCaching:false}); //fr
+
+[/cc]
+<div class="related-reading">相关阅读
+<ul>
+	<li><a href="http://blog.rebeccamurphey.com/2009/10/15/using-objects-to-organize-your-code">Rebecca Murphey - Using Objects To Organize Your Code</a></li>
+	<li><a href="http://www.phpied.com/3-ways-to-define-a-javascript-class/">Stoyan Stefanov - 3 Ways To Define A JavaScript Class </a></li>
+	<li><a href="http://benalman.com/news/2010/03/theres-no-such-thing-as-a-json/">Ben Alman - Clarifications On Object Literals (There's no such thing as a JSON Object)</a></li>
+	<li><a href="http://ejohn.org/blog/simple-javascript-inheritance/">John Resig - Simple JavaScript Inheritance</a></li>
+</ul>
+</div>
+<h1>CommonJS 模块</h1>
+在过去一到两年时间里，你可能听说过CommonJS --- 一个自发的组织，这个组织设计和标准化JavaScript Api。目前他们已经正式发布了modules 和 packages 标准。CommonJS的AMD草案给出了一个用于声明模块的简单的API，这些模块可以通过同步或异步的方式加载进浏览器。他们的模块模式相对来说实现的比较干净，我相信这也为ES Harmony（下一代的Javascript语言）奠定了基石。
+
+从结构结构化的角度来看，一个CommonJS模块是一个段可以重用的JavaScript代码。它导出特定的对象，这个对象对于所有依赖这个模块的代码都可用。这种模块模式已经作为Javascript实现模块的标准模式而无处不在。有大量介绍实现CommonJS模块的教程，但是在较高层次上观察，他们基本包含两部分：一个exports对象，包含模块内定义的想导出给其他模块的对象和方法；一个require函数，用于导入其他模块。
+
+有大量非常棒的JavaScript框架可以处理基于CommonJS模块格式的模块加载问题。我个人推荐RequireJS<span class="translator">（译者注：我个人推荐淘宝的SeaJS，详见<a href="http://seajs.com/" target="_blank">这里</a>）</span>。一个关于RequireJS的完整教程已经超出本文范围，但是我推荐阅读James Burke的<a href="http://msdn.microsoft.com/en-us/scriptjunkie/ff943568" target="_blank">文章</a>。
+
+RequireJS 提供了使用包装器创建静态模块的方法，并且也为实现异步加载提供及其简单的方式。它可以很容易的加载模块及其依赖，然后当它加载完成时立即执行它。
+
+有些开发者抱怨CommonJS模块不是太适合浏览器。理由是在没有后端支持的情况下，模块无法通过script标签加载。假设有一个将图片转为ASCII码的模块，这个模块有一个导出函数叫做encodeToASCII。代码可能类似于：
+
+[cc lang="javascript"]
+var encodeToASCII = require("encoder").encodeToASCII;
+exports.encodeSomeSource = function(){
+  //process then call encodeToASCII
+}
+
+[/cc]
+
+这样的代码无法在script标签内加载，因为代码没有包装，意味这encodeToASCII将绑定在window对象上，require可能未定义，exports也可能未声明。一个客户端的框架结合服务端的支持或者一个通过XHR加载script然后通过eval()执行，可以很容易解决这个问题。
+
+使用RequireJS，模块可以按如下方式定义<span class="transtator"></span>。
+
+[cc lang="javascript"]
+define(function(require, exports, module) {
+  var encodeToASCII = require("encoder").encodeToASCII;
+  exports.encodeSomeSource = function(){
+    //process then call encodeToASCII
+  }
+});
+[/cc]
+
+对于那些在项目中可能不只是使用静态JavaScript开发者来说，CommonJS模块是一个非常理想的模式。但请深入了解它，我只是介绍了CommonJS的冰山一角。
+<div class="related-reading">相关阅读
+<ul>
+	<li><a href="http://wiki.commonjs.org/wiki/Modules">The CommonJS Module Specifications</a></li>
+	<li><a href="http://dailyjs.com/2010/10/18/modules/">Alex Young - Demystifying CommonJS Modules</a></li>
+	<li><a href="http://requirejs.org/docs/commonjs.html#packages">Notes on CommonJS modules with RequireJS</a></li>
+</ul>
+</div>
+
+<h1>外观模式</h1>
+接下来，我们要开始讨论外观模式。外观模式将在今天讨论的架构中扮演重要的角色。
+
+通常，通过创建外观，你屏蔽掉了不同的实现。外观模式为一段大体积的代码提供了方便的高级别的接口，这些接口隐藏了底层的复杂性。可以把它想象为提供给其他开发者的API。
+
+外观模式是一个结构化模式，大量的JavaScript库和框架都使用了这种模式。一个框架可能提供了大量支持不同行为的方法，但只有一个外观或这些方法的有限制的抽闲被暴漏给客户端来使用。
+
+这允许我们只与外观交互，而不是场景背后的子系统。
+
+外观模式之所以很有用，是因为他屏蔽了包含在不同模块中的功能点实现细节。可以在不影响客户程序的前提下去修改模块的实现。
+
+通过维护一个一致的外观，就不必要担心模块是大量使用dojo, jQuery, YUI还是别的什么东西。只要交互层没有发生变化，你就可以切换地层框架，而且不会影响到系统的其他部分。
+
+下面是一个非常基础的外观模式的例子。如你所看到的，我们的模块包含私有方法。然后通过外观来支持一个访问这些方法的简单API。
+
+[cc lang="javascript"]
+var module = (function() {
+  var _private = {
+    i:5,
+    get : function() {
+      console.log('current value:' + this.i);
+    },
+    set : function( val ) {
+      this.i = val;
+     },
+    run : function() {
+      console.log('running');
+    },
+    jump: function(){
+      console.log('jumping');
+    }
+  };
+  return {
+    facade : function( args ) {
+      _private.set(args.val);
+      _private.get();
+      if ( args.run ) {
+        _private.run();
+      }
+    }
+  }
+}());
+
+module.facade({run: true, val:10});
+//outputs current value: 10, running
+[/cc]
+
+在把它应用到我们架构中之前，外观模式就只有这些。下一步，我们会深入探讨一下中介者模式。中介者模式和外观模式的核心区别在于，外观模式（结构化模式）只能暴漏已经存在的功能，而中介者（行为模式）却可以添加功能。
+<div class="related-reading">相关阅读
+<ul>
+	<li><a href="http://books.google.co.uk/books?id=za3vlnlWxb0C&amp;lpg=PA141&amp;ots=MD5BLTsSzH&amp;dq=javascript%20facade%20pattern&amp;pg=PA141#v=onepage&amp;q=javascript facade pattern&amp;f=false">Dustin Diaz, Ross Harmes - Pro JavaScript Design Patterns (Chapter 10, available to read on Google Books)</a></li>
+</ul>
+</div>
+<h1>中介者模式</h1>
+介绍中介者模式最好的方式就是类比 – 想象一下机场控制中心。控制塔处理那些飞机可以起飞或这着陆，因为所有飞机都只能与控制塔通信，而不是飞机与飞机间通信。中心控制器是这个系统成功的关键，这也正好描述了“中介者”是什么。
+<blockquote>当模块间的通信复杂，但有良好的定义，可以使用中介者。如果你的系统中模块间有太多的关系，就该考虑使用一个中心控制器，中介者模式非常适合这样的场景。</blockquote>
+真实情况是，中介者作为一个中间人，把不同模块之间的交互进行了封装。这个模式通过防止对象间显示的引用而保证了模块的松耦合 – 在我们的系统中，这帮助我们解决间的交互问题。
+
+中介者模式还提供了什么好处？它允许模块的行为独立的变化，这是极其灵活的。如果之前你在你的系统中使用过观察者模式来实现不同模块间的消息广播，你发现中介这模式非常容易理解。
+
+让我们在高层次上观察下模块可能怎样与中介者通信。
+
+<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart4a.jpg"><img class="alignleft size-full wp-image-240" title="chart4a" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart4a.jpg" alt="" width="618" height="297" /></a>
+
+&nbsp;
+
+可以把模块理解为发布者，而中介者既是发布者又是订阅者。模块1发布一个事件，通知中介者有事情要做。中介者捕获这个消息，通知模块2去完成模块1发布的任务。然后模块2发布一个完成消息给中介者。中介者同时也启动了模块三来记录中介者返回的通知。
+
+注意，模块间没有发生任何直接的通信。如果链路中的模块由于某种原因关掉或停止运行，中介者可能暂停其他模块的任务，重启模块3然后继续之前的工作，而这一切对系统几乎没有影响。这种级别的解耦是这个模式可以提供的能力之一。
+<div>总结一下，中介者模式带来的好处有：</div>
+中介者模式通过添加一个中心控制点来给模块解耦。它允许模块在不关心系统其他部分的前提下，发送或接受消息。消息可以被任意数量的模块同时处理。
+
+这样解耦的系统也更加容易添加或移除功能。
+<div>中介者模式的缺点是：</div>
+由于有一个中介者，模块间只能间接的通信。这可能会带来很小的性能损失，同时，也很难只通过观察系统中的消息广播来了解系统的行为。
+<div>例子：这是中介者模式的一个可能实现，基于<a href="https://github.com/rpflorence" target="_blank">rpflorence</a>之前的工作</div>
+[cc lang="javascript"]
+var mediator = (function(){
+  var subscribe = function(channel, fn){
+    if (!mediator.channels[channel]) mediator.channels[channel] = [];
+    mediator.channels[channel].push({ context: this, callback: fn });
+    return this;
+  },
+
+  publish = function(channel){
+    if (!mediator.channels[channel]) return false;
+    var args = Array.prototype.slice.call(arguments, 1);
+    for (var i = 0, l = mediator.channels[channel].length; i &lt; l; i++) {
+      var subscription = mediator.channels[channel][i];
+      subscription.callback.apply(subscription.context, args);
+    }
+    return this;
+  };
+
+  return {
+    channels: {},
+    publish: publish,
+    subscribe: subscribe,
+    installTo: function(obj){
+      obj.subscribe = subscribe;
+      obj.publish = publish;
+    }
+  };
+}());
+
+[/cc]
+<div>例子：这是应用上面中介者实现的两个例子。</div>
+[cc lang="javascript"]
+
+//Pub/sub on a centralized mediator
+
+mediator.name = "tim";
+mediator.subscribe('nameChange', function(arg){
+  console.log(this.name);
+  this.name = arg;
+  console.log(this.name);
+});
+
+mediator.publish('nameChange', 'david'); //tim, david
+
+//Pub/sub via third party mediator
+
+var obj = { name: 'sam' };
+mediator.installTo(obj);
+obj.subscribe('nameChange', function(arg){
+  console.log(this.name);
+  this.name = arg;
+  console.log(this.name);
+});
+
+obj.publish('nameChange', 'john'); //sam, john
+
+[/cc]
+<div class="related-reading">相关阅读
+<ul>
+	<li>Stoyan Stefanov - Page 168, JavaScript Patterns</li>
+	<li><a href="http://arguments.callee.info/2009/05/18/javascript-design-patterns--mediator/">HB Stone - JavaScript Design Patterns: Mediator</a></li>
+	<li><a href="http://www.vincehuston.org/dp/mediator.html">Vince Huston - The Mediator Pattern (not specific to JavaScript, but a concise)</a></li>
+</ul>
+</div>
+下一节将给出架构的具体实现
+<div>下一篇：<a href="http://kingzs70.sinaapp.com/2011/12/07/patterns_for_large-scale_javascript_application_architecture_3">[译]大规模JavaScript应用架构模式(三）</a></div>

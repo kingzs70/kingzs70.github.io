@@ -1,0 +1,61 @@
+---
+layout: post
+title: 二级跨域问题完整解决方案
+tags:
+- Ajax
+- JavaScript
+- jsonp
+- 跨域
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  duoshuo_thread_id: '1310856454332219406'
+---
+站点引入二级域名后要面临的一个问题就是如何处理二级跨域调用。
+所谓二级跨域就是指：主域名相同，二级域名不同的连接间的互相调用。
+如在url为 http://www.demo.com 页面中请求 http://json.demo.com 这个连接。
+引入二级域名后带来的主要问题有：
+<h2>1. ajax无法跨域调用</h2>
+解决ajax二级跨域的方法很简单。在你的主域下创建一个代理html页面，代码大致如下：
+[cc lang='html']
+
+
+<script type="text/javascript">// <![CDATA[
+document.domain="demourl.com";
+function getXHR () {
+	try {
+		try {
+			return new ActiveXObject('Msxml2.XMLHTTP');
+		} catch (e) {
+			return new ActiveXObject('Microsoft.XMLHTTP');
+		}
+	} catch (e) {
+		return new XMLHttpRequest();
+	}
+}
+// 
+
+
+[/cc]
+
+其他页面也都设置同样的document.domain。这样就可以通过调用代理页面中的getXHR方法获取ajax对象，实现跨域请求。
+但以上方法仍然有问题。有些页面中是无法设置document.domain字段的，比如需要使用第三方组件，而这个组件内使用iframe实现对话框，一旦设置了document.domain将导致这些iframe实现的对话框无法和父页面之间的代码无法互相调用。除非修改第三方组件中的iframe源码，也为其添加document.domain字段，但这会导致组件以后升级麻烦。
+
+遇到无法设置document.domain的情况，可以从两个方面解决这个问题：
+a). 避免在些页面中出现跨域调用。
+b). 这些跨域调用如果是get形式，可以采用jsonp调用。
+大多数框架对jsonp调用方法都有封装。这里指给出一个后台接口的设计方案，由于后台接口可能有非jsop调用的情况，可以添加一个字段比如jsonp，当其为true时，以jsonp的形式返回，否则以正常形式返回。以jsonp形式返回的结果通常为：
+假设请求调用为：http://demo.com?jsonp=true&cb=callback1
+[cc lang="javascript"]
+try{
+callback1(...)
+}catch(e){}
+[/cc]
+2. javascript无法跨域访问iframe
+不同域名下的iframe无法互相调用javascript。除非设置了相同的document.domain。但是，还有一个更麻烦的问题，一旦页面中设置了document.domain，那么动态创建的iframe，在ie下也是无法通过javascript访问的。一个典型的应用场景就是“文件上传的iframe异步提交”
+解决这个问题的方式是，在创建iframe时执行如下代码
+[cc lang="javascript"]
+iframe.src="javascript:document.open();document.domain='demo.com';document.close();"
+[/cc] ]]>

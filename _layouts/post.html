@@ -1,9 +1,53 @@
 ---
 layout: default
 ---
-<h2>{{ page.title }}</h2>
-<p class="meta">{{ page.date | date_to_string }}</p>
-
-<div class="post">
+<article>
+<header class="entry-header">
+<h1 class="entry-title">{{ page.title }}</h1>
+</header>
+<div class="entry-content">
 {{ content }}
+<br />
+<br />
+<blockquote class='feed-copyright'>欢迎转载，但请保证转载后内容排版美观、易读，且保留本文连接：<br />
+<a rel="bookmark" title="{{ page.title }}" href="{{ page.url }}">{{site.url}}{{ page.url }}</a>
+</blockquote>
+</div>
+<footer class="entry-meta">
+<p class="meta">{{ page.date | date_to_string }}</p>
+</footer>
+</article>
+
+<div class='share-to'>
+<!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone">QQ空间</a>
+<a class="bds_tsina">新浪微博</a>
+<a class="bds_tqq">腾讯微博</a>
+<a class="bds_douban">豆瓣网</a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;mini=1&amp;uid=122771" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
+</script>
+<!-- Baidu Button END -->
+</div>
+
+<!-- UJian Button BEGIN -->
+<div class="ujian-hook"></div>
+<script type="text/javascript">var ujian_config = {num:6,showType:4,lkrc:0,bgColor:'#',mouseoverColor:'#F7F7F7',hoverTextColor:'#26ADE4'};</script>
+<script type="text/javascript" src="http://v1.ujian.cc/code/ujian.js?uid=1791910"></script>
+<!-- UJian Button END -->
+
+<div class="ds-thread" data-thread-key="{{ page.id }}" data-author-key="1" data-title="{{ page.title }}" data-url="{{site.url}}{{page.url}}"></div>
+<script type="text/javascript">
+	if (typeof DUOSHUO !== 'undefined')
+		DUOSHUO.EmbedThread('.ds-thread');
+</script>
+<div id="ds-ssr">
+    <ol id="commentlist">
+    </ol>
 </div>
