@@ -14,7 +14,7 @@ meta:
 
 问题一：如下两次alert的输出是什么？
 
-[cc lang="javascript"]
+{% highlight javascript %}
 var a = 1;
 function func(){
   alert(a);
@@ -22,11 +22,11 @@ function func(){
   alert(a);
 }
 func();
-[/cc]
+{% endhighlight %}
 
 问题二：如下alert的输出依次是什么？
 
-[cc lang="javascript"]
+{% highlight javascript %}
 function func(){
   alert(1);
 }
@@ -39,7 +39,7 @@ function func(){
   alert(3);
 }
 func();
-[/cc]
+{% endhighlight %}
 <!--more-->
 <h3>理解问题一</h3>
 
@@ -57,59 +57,59 @@ func();
 
 首先要理解的问题是：JavaScript函数有几种定义方式，每种方式有什么区别。
 方法1：函数声明
-[cc lang="javascript"]
+{% highlight javascript %}
 function add(x, y) {
   return x + y;
 }
-[/cc]
+{% endhighlight %}
 方法2：函数表达式，使用匿名函数
-[cc lang="javascript"]
+{% highlight javascript %}
 var add = function (x, y) {
   return x + y;
 }
-[/cc]
+{% endhighlight %}
 方法3：函数表达式，提供函数名
-[cc lang="javascript"]
+{% highlight javascript %}
 var add = function other_add(x, y) {
   return x + y
 }
-[/cc]
+{% endhighlight %}
 方法4: 函数构造器
-[cc lang="javascript"]
+{% highlight javascript %}
 var func = new Function("x", "y", "return x + y")
-[/cc]
+{% endhighlight %}
 
 使用“方法1：函数声明”定义函数时，会同时在函数所在作用域内创建一个与函数名相同的变量 add 。变量add指向 函数对象function add(){...}。以这种方式定义函数，在函数定以前就可以使用，也就是说如下代码是正确的：
-[cc lang="javascript"]
+{% highlight javascript %}
 var a = add(1,2);
 function add(x, y) {
   return x + y;
 }
-[/cc]
+{% endhighlight %}
 原因是函数对象（function add(){...}）是在代码解析时创建的，变量add与函数对象一同被创建。
 读到这里，已经可以确定问题二中第一个alert输出的是“3”。因为func最后一次被解析出来的内容是function func(){alert(3)}，也就是在 func() 第一次运行时 变量func 指向的第三个函数对象。
 
 “方法2：函数表达式，使用匿名函数” 与方法一的区别在于：方法2定义的函数是在运行时创建的，如果函数调用先于函数定义就会报错，下面的代码就是<span style="color:red">错误的</span>
-[cc lang="javascript"]
+{% highlight javascript %}
 var a = add(1,2);
 var add = function (x, y) {
   return x + y;
 }
-[/cc]
+{% endhighlight %}
 读到这里，可以已经可以确定问题二中第二个和第三alert输出的都是2。因为变量func在第5行是被重新定义，指向了第二个函数。在后面的代码中，func并没有被重新定义。第三个函数是在解析时完成定义的，而非运行时。
 
 "方法3：函数表达式，提供函数名"与方法2基本相似，需要注意的是 “other_add” 并不是一个变量，它仅仅是函数对象的名字。这个名字并没有以变量的形式定义在函数所在作用域中，而是被定义在了，函数自身的作用域中。如下代码可以验证这一点：
-[cc lang="javascript"]
+{% highlight javascript %}
 var add = function other_add(x, y) {
   alert(typeof other_add);
   return x + y
 }
 add(1,2); //alert function
 alert(typeof other_add); //alert undefined
-[/cc]
+{% endhighlight %}
 
 "方法4: 函数构造器"。函数也是对象，也存在对应的构造器方法。需要注意的问题：以这种方式定义的函数，只能继承window作用域。也就是说函数体中变量最多可以向外查找到window作用域内的变量。下面代码可以验证这一点。
-[cc lang="javascript"]
+{% highlight javascript %}
 var a = "out";
 function in_score(){
   var a = "in";
@@ -117,7 +117,7 @@ function in_score(){
   func();
 }
 in_score();//alert "out"
-[/cc]
+{% endhighlight %}
 
 总结。如何写出可维护的JavaScript代码？问题二给出了两个方向：
 1. 合理控制变量名与函数名，避免作用内或以及跨作用域的命名冲突。
