@@ -10,7 +10,7 @@ meta:
   _edit_last: '1'
   duoshuo_thread_id: '1310856454332219404'
 ---
-<div>前一篇：<a href="http://kingzs70.sinaapp.com/2011/12/07/patterns_for_large-scale_javascript_application_architecture_2">[译]大规模JavaScript应用架构（二）</a></div>
+<div>前一篇：<a href="http://kingzs70.github.io/2011/12/07/patterns_for_large-scale_javascript_application_architecture_2">[译]大规模JavaScript应用架构（二）</a></div>
 <div class="catalog">本节目录
 <ul>
 	<li>外观 – 核心的抽象</li>
@@ -46,16 +46,16 @@ meta:
 	<li>那些对象在哪里（服务端还是客户端）</li>
 	<li>有多少对象订阅了通知</li>
 </ul>
-<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart1a.gif"><img class="alignleft size-full wp-image-242" title="chart1a" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart1a.gif" alt="" width="617" height="358" /></a>
+<a href="http://kingzs70-wordpress.stor.github.io/uploads/2011/12/chart1a.gif"><img class="alignleft size-full wp-image-242" title="chart1a" src="http://kingzs70-wordpress.stor.github.io/uploads/2011/12/chart1a.gif" alt="" width="617" height="358" /></a>
 
 <strong>外观</strong>抽象了系统的核心，避免模块直接接触核心。它订阅感兴趣的消息（来自模块）然后说：“很好，发生了什么？告诉我细节”。它通过检查发送消息的模块是否拥有必要的许可来处理模块安全问题。
 
 <a href="http://itzoo.info/wp-content/uploads/2011/12/chart2a.gif">
-</a><a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart2a.gif"><img class="alignleft size-full wp-image-243" title="chart2a" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart2a.gif" alt="" width="622" height="348" /></a>
+</a><a href="http://kingzs70-wordpress.stor.github.io/uploads/2011/12/chart2a.gif"><img class="alignleft size-full wp-image-243" title="chart2a" src="http://kingzs70-wordpress.stor.github.io/uploads/2011/12/chart2a.gif" alt="" width="622" height="348" /></a>
 
 <strong>中介者</strong>（应用的核心）通过中介者模式扮演一个‘Pub/Sub’管理者的角色。它负责模块管理，在必要的时候启动或停止模块。这是依赖动态加载和确保失败模块在需要时可以重新启动的特定用途。
 
-<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart3a.gif"><img class="alignleft size-full wp-image-244" title="chart3a" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2011/12/chart3a.gif" alt="" width="622" height="360" /></a>
+<a href="http://kingzs70-wordpress.stor.github.io/uploads/2011/12/chart3a.gif"><img class="alignleft size-full wp-image-244" title="chart3a" src="http://kingzs70-wordpress.stor.github.io/uploads/2011/12/chart3a.gif" alt="" width="622" height="360" /></a>
 
 这个架构的结果是模块不在互相依赖。由于解耦的层次比较高，他们可以很容易的被维护和测试，模块可以在无需额外付出的情况下被投入到一个新页面中使用。他们也可以在系统保持运行的情况下被动态的加载和移除。
 <h1>Pub/Sub之外：自动事件注册</h1>

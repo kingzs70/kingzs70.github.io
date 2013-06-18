@@ -20,7 +20,7 @@ meta:
 <h2>1. ajax无法跨域调用</h2>
 解决ajax二级跨域的方法很简单。在你的主域下创建一个代理html页面，代码大致如下：
 {% highlight html %}
-<script type="text/javascript">// <![CDATA[
+<script type="text/javascript">
 document.domain="demourl.com";
 function getXHR () {
 	try {
@@ -33,7 +33,7 @@ function getXHR () {
 		return new XMLHttpRequest();
 	}
 }
-// 
+</script>
 {% endhighlight %}
 
 其他页面也都设置同样的document.domain。这样就可以通过调用代理页面中的getXHR方法获取ajax对象，实现跨域请求。

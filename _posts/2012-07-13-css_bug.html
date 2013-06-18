@@ -16,7 +16,7 @@ meta:
 
 有些时候我们以为是bug问题，实际上是因为我们对css标准理解的不到位。
 
-外边距叠加问题。对于如下代码。<a href="http://kingzs70.sinaapp.com/demo/layout/margin-doublication.html" target="_blank">查看demo</a>
+外边距叠加问题。对于如下代码。<a href="http://kingzs70.github.io/demo/layout/margin-doublication.html" target="_blank">查看demo</a>
 
 {% highlight css %}
 .wrong {margin:10px;background:#999;}
@@ -30,11 +30,11 @@ meta:
 {% endhighlight %}
 <!--more-->
 最直观的理解，应该是这样的：
-<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wr.png"><img class="size-full wp-image-252 aligncenter" title="wr" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wr.png" alt="" width="452" height="74" /></a>
+<a href="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/wr.png"><img class="size-full wp-image-252 aligncenter" title="wr" src="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/wr.png" alt="" width="452" height="74" /></a>
 
 
 但实际上却是：
-<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wrr.png"><img class="size-full wp-image-253 aligncenter" title="wrr" src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/wrr.png" alt="" width="463" height="43" /></a>
+<a href="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/wrr.png"><img class="size-full wp-image-253 aligncenter" title="wrr" src="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/wrr.png" alt="" width="463" height="43" /></a>
 
 理解这个问题，关键是要知道浏览器是如何计算div的高度的。</p>
 <blockquote>如果元素没有垂直边框或内边距，那么它的高度就是它包含的子元素的顶部和底部边框边缘之间的高度</blockquote>
@@ -73,10 +73,10 @@ ie7中以下属性也会触发布局
 haslayout是许多样式问题的根源。标准浏览器是没有haslayout这个概念的，这也就导致了标准浏览器和ie在渲染页面上的差异性。有一种方式很糟糕的方式可以避免这个问题，那就是让所有元素都流动起来，这样ie和标准浏览器在页面渲染方面就一致很多。但这样至少会导致ie渲染页面的效率会下降很多，同样也会引入很多其他问题（马上会提到）。
 
 文字环绕问题。如果你想实现一个文字环绕图片的效果，如：
-<a href="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/rrr.png"><img src="http://kingzs70-wordpress.stor.sinaapp.com/uploads/2012/07/rrr.png" alt="" title="rrr" width="400" height="257" class="aligncenter size-full wp-image-264" /></a>
-但由于某种原因，你给文字的p标签添加了zoom, overflow, min-width 等任何一种可以触发haslayout的属性。将会导致ie的某些版本出现问题。<a href="http://kingzs70.sinaapp.com/demo/layout/wenzihuanrao.html" target="_blank">查看demo</a>
+<a href="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/rrr.png"><img src="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/rrr.png" alt="" title="rrr" width="400" height="257" class="aligncenter size-full wp-image-264" /></a>
+但由于某种原因，你给文字的p标签添加了zoom, overflow, min-width 等任何一种可以触发haslayout的属性。将会导致ie的某些版本出现问题。<a href="http://kingzs70.github.io/demo/layout/wenzihuanrao.html" target="_blank">查看demo</a>
 
-haslayout导致的另一个问题就是，拥有布局的元素在计算自己的尺寸时，与标准浏览器不同。<a href="http://kingzs70.sinaapp.com/demo/layout/widthbug.html" target="_blank">用IE6查看</a>
+haslayout导致的另一个问题就是，拥有布局的元素在计算自己的尺寸时，与标准浏览器不同。<a href="http://kingzs70.github.io/demo/layout/widthbug.html" target="_blank">用IE6查看</a>
 
 其他问题：
 <ul>
@@ -90,11 +90,11 @@ haslayout导致的另一个问题就是，拥有布局的元素在计算自己�
 这就是为什么，修复ie下的bug总是涉及通过设置某种属性迫使元素拥有布局。关于haslayout属性的详细介绍可以查看这篇文章<a href="http://www.satzansatz.de/cssd/onhavinglayout.html" target="_blank">http://www.satzansatz.de/cssd/onhavinglayout.html</a>。IE7修复了部分由haslayout引起的bug，但并没有完全解决。IE8采用全新的渲染引擎，貌似弃用了haslayout属性，解决了问题的根源。
 
 <h2>3. 与浮动有关的bug</h2>
-<h3>1. ie6的双边距bug。<a href="http://kingzs70.sinaapp.com/demo/bug/double-margin.html" target="_blank">IE6查看</a></h3>
+<h3>1. ie6的双边距bug。<a href="http://kingzs70.github.io/demo/bug/double-margin.html" target="_blank">IE6查看</a></h3>
 出现场景：具有水平边距的浮动元素，靠近容器浮动方向的边距会加倍
 基本解决方法：设置float的同时，设置display:inline.
 避免出现这个bug：不使用浮动布局，使用display:inline-block，布局。注意：ie6只有inline元素支持这个属性，其他元素设置这个属性只是触发haslayout属性。
-<h3>2. ie6的3像素文本偏移bug。<a href="http://kingzs70.sinaapp.com/demo/bug/3px.html" target="_blank">IE6查看</a></h3>
+<h3>2. ie6的3像素文本偏移bug。<a href="http://kingzs70.github.io/demo/bug/3px.html" target="_blank">IE6查看</a></h3>
 出现场景：文本与一个浮动元素相邻时。
 基本解决方法：给浮动元素设置一个-3px的margin值。
 <h3>3. ie6的“藏猫猫”bug</h3>
