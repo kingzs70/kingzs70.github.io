@@ -30,11 +30,11 @@ meta:
 {% endhighlight %}
 <!--more-->
 最直观的理解，应该是这样的：
-<a href="http://kingzs70.github.io/uploads/2012/07/wr.png"><img class="size-full wp-image-252 aligncenter" title="wr" src="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/wr.png" alt="" width="452" height="74" /></a>
+<a href="http://kingzs70.github.io/uploads/2012/07/wr.png"><img class="size-full wp-image-252 aligncenter" title="wr" src="http://kingzs70.github.io/uploads/2012/07/wr.png" alt="" width="452" height="74" /></a>
 
 
 但实际上却是：
-<a href="http://kingzs70.github.io/uploads/2012/07/wrr.png"><img class="size-full wp-image-253 aligncenter" title="wrr" src="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/wrr.png" alt="" width="463" height="43" /></a>
+<a href="http://kingzs70.github.io/uploads/2012/07/wrr.png"><img class="size-full wp-image-253 aligncenter" title="wrr" src="http://kingzs70.github.io/uploads/2012/07/wrr.png" alt="" width="463" height="43" /></a>
 
 理解这个问题，关键是要知道浏览器是如何计算div的高度的。</p>
 <blockquote>如果元素没有垂直边框或内边距，那么它的高度就是它包含的子元素的顶部和底部边框边缘之间的高度</blockquote>
@@ -73,7 +73,7 @@ ie7中以下属性也会触发布局
 haslayout是许多样式问题的根源。标准浏览器是没有haslayout这个概念的，这也就导致了标准浏览器和ie在渲染页面上的差异性。有一种方式很糟糕的方式可以避免这个问题，那就是让所有元素都流动起来，这样ie和标准浏览器在页面渲染方面就一致很多。但这样至少会导致ie渲染页面的效率会下降很多，同样也会引入很多其他问题（马上会提到）。
 
 文字环绕问题。如果你想实现一个文字环绕图片的效果，如：
-<a href="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/rrr.png"><img src="http://kingzs70-wordpress.stor.github.io/uploads/2012/07/rrr.png" alt="" title="rrr" width="400" height="257" class="aligncenter size-full wp-image-264" /></a>
+<a href="http://kingzs70.github.io/uploads/2012/07/rrr.png"><img src="http://kingzs70.github.io/uploads/2012/07/rrr.png" alt="" title="rrr" width="400" height="257" class="aligncenter size-full wp-image-264" /></a>
 但由于某种原因，你给文字的p标签添加了zoom, overflow, min-width 等任何一种可以触发haslayout的属性。将会导致ie的某些版本出现问题。<a href="http://kingzs70.github.io/demo/layout/wenzihuanrao.html" target="_blank">查看demo</a>
 
 haslayout导致的另一个问题就是，拥有布局的元素在计算自己的尺寸时，与标准浏览器不同。<a href="http://kingzs70.github.io/demo/layout/widthbug.html" target="_blank">用IE6查看</a>
