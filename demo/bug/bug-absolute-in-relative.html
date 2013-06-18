@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+	<title>ie6-bug | 相对定位元素没有layout时内部绝对定位元素定位出错</title>
+	<style>
+		* {
+			margin:0;
+			padding:0;
+		}
+		#page {
+			width:500px;
+			margin:0 auto;
+			border:1px solid #aaa;
+			height:500px;
+		}
+		.container {
+			border:1px solid green;
+			margin:0 auto;
+			margin-top:10px;
+			color:#fff;
+		}
+		.container:after {
+			content:'';
+			display:block;
+			visibility:hidden;
+			clear:both;
+			height:0;
+		}
+		.inner {
+			width:100px;
+			height:100px;
+		}
+		.bug {
+			border:1px solid red;
+		}
+		.bug .inner {
+			background: red;
+		}
+		.fixed .inner {
+			background: green;
+		}
+
+		.container {
+			position:relative;
+		}
+		.inner {
+			position:absolute;
+			bottom:0;
+			left:0;
+		}
+
+		.fixed  {
+			zoom:1;
+		}
+	</style>
+</head>
+<body>
+	<div id='page'>
+		<div class='container bug'>
+			<br /><br /><br /><br /><br /><br /><br /><br />
+			<p class='inner'>
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+			</p>
+		</div>
+		<div class='container fixed'>
+			<br /><br /><br /><br /><br /><br /><br /><br />
+			<p class='inner'>
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+			</p>
+		</div>
+	</div>
+</body>
+</html>
+

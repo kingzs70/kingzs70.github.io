@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>haslayout导致元素宽度计算错误</title>
+<style>
+body {background:#fff}
+.main {width:200px}
+
+
+</style>
+</head>
+<body>
+<div class="main">
+	<div style="background:#eee">
+		<h3>正确的样式</h3>
+		<div style="width:200px;overflow:hidden;">
+		11111111111111111111111111111111111111111
+		</div>
+	</div>
+	<div style="background:#ddd">
+		<h3>ie6下宽度会变宽</h3>
+		<p>
+		11111111111111111111111111111111111111111
+		</p>
+	</div>
+</div>
+</body>
+</html>

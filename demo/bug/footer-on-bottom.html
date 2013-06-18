@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>footer永远居于页面底部</title>
+<style>
+* {
+    margin:0;
+    padding:0;
+}
+html, body{
+    height:100%;
+}
+#page {
+    height:auto;
+    min-height:100%;
+}
+#main {
+    padding-bottom:50px;
+}
+#branding {
+    height:50px;
+
+    background-color:#0f0;
+}
+#colophon {
+    height:50px;
+    margin-top:-50px;
+
+    background-color:#f00;
+}
+</style>
+</head>
+<body>
+    <div id='page'>
+        <div id='branding'>
+	    header
+		</div>
+		<div id='main'>
+			<div id='primary'>
+			</div>
+	    	<div id='secondary'>
+	    	</div>
+		</div>
+    </div>
+    <div id='colophon'>
+	footer
+    </div>
+</body>
+</html>

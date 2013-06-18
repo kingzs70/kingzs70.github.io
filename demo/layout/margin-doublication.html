@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>外边距叠加</title>
+<style>
+* {
+    margin:0;
+    padding:0;
+}
+body{
+    margin:10px;
+}
+.wrong {margin:10px;background:#999;}
+.wrong p {margin:20px;background:red;}
+
+.right {margin:10px;background:#999;padding:1px;}
+.right p {margin:20px;background:green;}
+
+</style>
+</head>
+<body>
+<div class="wrong">
+<p>wrong</p>
+</div>
+<div class="right">
+<p>right</p>
+</div>
+</body>
+</html>

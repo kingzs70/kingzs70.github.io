@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+	<title>ie6浮动元素与非浮动元素相邻的三像素bug</title>
+	<style>
+		* {
+			margin:0;
+			padding:0;
+		}
+		.container {
+			border:1px solid green;
+			margin:0 auto;
+			width:500px;
+			margin-top:10px;
+			color:#fff;
+		}
+		.container:after {
+			content:'';
+			display:block;
+			visibility:hidden;
+			clear:both;
+			height:0;
+		}
+		.bug {
+			border:1px solid red;
+		}
+		.bug .inner {
+			background: red;
+		}
+		.fixed .inner {
+			background: green;
+		}
+		.float {
+			float:left;
+			width:100px;
+			height:100px;
+			background:#747;
+		}
+
+
+
+		#one .inner {
+		}
+		#two .inner {
+			height:100px;
+			width:200px;
+		}
+		/* 问题修复 */
+		/* 方法一 */
+		#one .fixed  .float {
+			_margin-right:-3px;
+		}
+		/* 方法二 */
+		#two .fixed  .inner {
+			_float:left;
+		}
+			
+	</style>
+</head>
+<body>
+  <div id='one'>
+		<div class='container bug'>
+			<div class='float'></div>
+			<p class='inner'>
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+			</p>
+		</div>
+		<div class='container fixed'>
+			<div class='float'></div>
+			<p class='inner'>
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+			</p>
+		</div>
+	</div>
+	<div id='two'>
+		<div class='container bug'>
+			<div class='float'></div>
+			<p class='inner'>
+			</p>
+		</div>
+		<div class='container fixed'>
+			<div class='float'></div>
+			<p class='inner'>
+			</p>
+		</div>
+	</div>
+</body>
+</html>
+

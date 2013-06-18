@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>外边距叠加</title>
+<style>
+body {background:#fff}
+.main {width:400px}
+.main img {margin:3px;}
+
+</style>
+</head>
+<body>
+<div class="main">
+	<div style="background:#eee">
+		<h3>正确的样式</h3>
+		<img style="float:left" src="http://www.baidu.com/img/baidu_sylogo1.gif" />
+		<p>
+		百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，
+		</p>
+	</div>
+	<hr />
+	<div style="background:#ddd">
+		<h3>ie7及以上浏览器会出问题</h3>
+		<img style="float:left" src="http://www.baidu.com/img/baidu_sylogo1.gif" />
+		<p style="overflow">
+		百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，
+		</p>
+	</div>
+	<hr />
+	<div style="background:#ccc">
+		<h3>ie6及以上浏览器会出问题</h3>
+		<img style="float:left" src="http://www.baidu.com/img/baidu_sylogo1.gif" />
+		<p style="zoom:1;">
+		百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，百度是一个好网站，
+		</p>
+	</div>
+</div>
+</body>
+</html>

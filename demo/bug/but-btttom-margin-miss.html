@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>ie下浮动元素底部margin无效bug</title>
+		<style>
+			* {
+				margin:0;
+				padding:0;
+			}
+			.container {
+				border:1px solid green;
+				margin:0 auto;
+				width:500px;
+				margin-top:10px;
+				color:#fff;
+			}
+			.bug {
+				border:1px solid red;
+			}
+			.bug .inner {
+				background: red;
+			}
+			.fixed {
+				*padding-bottom:20px;
+			}
+			.fixed .inner {
+				background: green;
+			}
+			.container:after {
+				content:'';
+				display:block;
+				visibility:hidden;
+				clear:both;
+				height:0;
+			}
+			.inner {
+				float:left;
+				display:inline;
+				margin:20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class='container bug'>
+			<div class='inner'>
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+			</div>
+		</div>
+		<div class='container fixed'>
+			<div class='inner'>
+				inner<br />
+				inner<br />
+				inner<br />
+				inner<br />
+			</div>
+		</div>
+	</body>
+</html>

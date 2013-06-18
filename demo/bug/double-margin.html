@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>ie6下浮动元素双倍margin bug</title>
+		<style>
+			* {
+				margin:0;
+				padding:0;
+			}
+			.container {
+				border:1px solid red;
+				width:500px;
+				margin-top:10px;
+			}
+			.container:after {
+				content:'';
+				display:block;
+				visibility:hidden;
+				clear:both;
+				height:0;
+			}
+			#bug-left, #bug-right {
+				float:left;
+				margin-left:20px;
+				background:#f00;
+			}
+			#left, #right {
+				float:left;
+				display:inline;
+				margin-left:20px;
+				background:#0f0;
+			}
+		</style>
+	</head>
+	<body>
+		<h3>我有双边距</h3>
+		<div class='container'>
+			<div id='bug-left'>
+				left<br />
+				left<br />
+				left<br />
+				left<br />
+			</div>
+			<div id='bug-right'>
+				right<br />
+				right<br />
+				right<br />
+				right<br />
+			</div>
+		</div>
+		<h3>我没有哦</h3>
+		<div class='container'>
+			<div id='left'>
+				left<br />
+				left<br />
+				left<br />
+				left<br />
+			</div>
+			<div id='right'>
+				right<br />
+				right<br />
+				right<br />
+				right<br />
+			</div>
+		</div>
+	</body>
+</html>

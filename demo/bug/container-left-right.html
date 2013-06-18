@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>两列布局</title>
+		<style>
+			* {
+				margin:0;
+				padding:0;
+			}
+			#container {
+				padding:10px;
+				border:1px solid red;
+				margin:0 auto;
+				width:500px;
+/*  ie可以通过让元素拥有layout的形式来清除浮动 */
+/* 指定宽度后container拥有layout, 当其内部元素高度超过它时，
+它会自动调整自己的高度以容纳内部，意味着不需要 clear fix，
+也就是说下面的#container:after对ie来说是没有用的 */
+			}
+/* 应用于非ie浏览器 */
+			#container:after {
+				content:'';
+				display:block;
+				visibility:hidden;
+				clear:both;
+				height:0;
+			}
+			#left {
+				float:left;
+				width:200px;
+				margin-right:10px;
+				background:#f00;
+			}
+			#right {
+				float:left;
+				width:290px;
+				background:blue;
+				color:#fff;
+			}
+		</style>
+	</head>
+	<body>
+		<div id='container'>
+			<div id='left'>
+				left<br />
+				left<br />
+				left<br />
+				left<br />
+			</div>
+			<div id='right'>
+				right<br />
+				right<br />
+				right<br />
+				right<br />
+			</div>
+		</div>
+		<div>nothing</div>
+	</body>
+</html>
