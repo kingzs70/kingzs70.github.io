@@ -48,7 +48,7 @@ meta:
 
 下面是一个使用模块模式实现的购物车模块。模块自身完全是自我包含于一个叫做basketModule的全局对象中。模块中basket数组是私有的，所以应用的其他代码是无法直接访问它的。它只存在于模块的闭包内。所以，唯一能够访问它的就是在闭包内定义的函数（addItem(), getItem(), etc）。
 
-[cc lang="javascript"]
+{% highlight javascript %}
 var basketModule = (function() {
   var basket = []; //private
   return { //exposed to public
@@ -68,11 +68,11 @@ var basketModule = (function() {
   }
 }());
 
-[/cc]
+{% endhighlight %}
 
 在模块内部，你可能注意到我们返回了一个object。它被自动付给basketModule。所以你可以通过如下方式与它交互：
 
-[cc lang="javascript"]
+{% highlight javascript %}
 //basketModule is an object with properties which can also be methods
 basketModule.addItem({item:'bread',price:0.5});
 basketModule.addItem({item:'butter',price:0.3});
@@ -84,14 +84,14 @@ console.log(basketModule.getTotal());
 console.log(basketModule.basket);// (undefined as not inside the returned object)
 console.log(basket); //(only exists within the scope of the closure)
 
-[/cc]
+{% endhighlight %}
 
 上面的方法都被高效的组织在basketModule命名空间下。
 <h1>一些框架是如何实现模块模式的？</h1>
 <div>Dojo</div>
 Dojo通过 dojo.declare，尝试提供一个类似于”class”的机制。比如，如果我们想在store命名空间上声明一个basket模块，可以通过如下方式：
 
-[cc lang="javascript"]
+{% highlight javascript %}
 //traditional way
 var store = window.store || {};
 store.basket = store.basket || {};
@@ -109,13 +109,13 @@ dojo.setObject("store.basket.object", (function() {
   };
 }()));
 
-[/cc]
+{% endhighlight %}
 <div>jQuery</div>
 jQuery有很多方式实现模块模式。
 
 下面的例子中，定义了一个library函数，它声明了一个新的library并且自动绑定了init方法到document.ready。
 
-[cc lang="javascript"]
+{% highlight javascript %}
 function library(module) {
   $(function() {
     if (module.init) {
@@ -133,7 +133,7 @@ var myLibrary = library(function() {
   };
 }());
 
-[/cc]
+{% endhighlight %}
 <div class="related-reading">相关阅读
 <ul>
 	<li><a href="http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth">Ben Cherry - The Module Pattern In-Depth</a></li>
@@ -147,7 +147,7 @@ var myLibrary = library(function() {
 
 模块模式在很多时候都很有用，但如果你发现自己没有什么需要隐藏的变量或方法，使用对象直接量可能更方便。
 
-[cc lang="javascript"]
+{% highlight javascript %}
 var myModule = {
   myProperty : 'someValue',
   //object literals can contain properties and methods.
@@ -178,7 +178,7 @@ myModule.myMethod(); //I can haz functionality
 myModule.myMethod2(); //outputs enabled
 myModule.myMethod3({language:'fr',useCaching:false}); //fr
 
-[/cc]
+{% endhighlight %}
 <div class="related-reading">相关阅读
 <ul>
 	<li><a href="http://blog.rebeccamurphey.com/2009/10/15/using-objects-to-organize-your-code">Rebecca Murphey - Using Objects To Organize Your Code</a></li>
@@ -198,26 +198,26 @@ RequireJS 提供了使用包装器创建静态模块的方法，并且也为实�
 
 有些开发者抱怨CommonJS模块不是太适合浏览器。理由是在没有后端支持的情况下，模块无法通过script标签加载。假设有一个将图片转为ASCII码的模块，这个模块有一个导出函数叫做encodeToASCII。代码可能类似于：
 
-[cc lang="javascript"]
+{% highlight javascript %}
 var encodeToASCII = require("encoder").encodeToASCII;
 exports.encodeSomeSource = function(){
   //process then call encodeToASCII
 }
 
-[/cc]
+{% endhighlight %}
 
 这样的代码无法在script标签内加载，因为代码没有包装，意味这encodeToASCII将绑定在window对象上，require可能未定义，exports也可能未声明。一个客户端的框架结合服务端的支持或者一个通过XHR加载script然后通过eval()执行，可以很容易解决这个问题。
 
 使用RequireJS，模块可以按如下方式定义<span class="transtator"></span>。
 
-[cc lang="javascript"]
+{% highlight javascript %}
 define(function(require, exports, module) {
   var encodeToASCII = require("encoder").encodeToASCII;
   exports.encodeSomeSource = function(){
     //process then call encodeToASCII
   }
 });
-[/cc]
+{% endhighlight %}
 
 对于那些在项目中可能不只是使用静态JavaScript开发者来说，CommonJS模块是一个非常理想的模式。但请深入了解它，我只是介绍了CommonJS的冰山一角。
 <div class="related-reading">相关阅读
@@ -243,7 +243,7 @@ define(function(require, exports, module) {
 
 下面是一个非常基础的外观模式的例子。如你所看到的，我们的模块包含私有方法。然后通过外观来支持一个访问这些方法的简单API。
 
-[cc lang="javascript"]
+{% highlight javascript %}
 var module = (function() {
   var _private = {
     i:5,
@@ -273,7 +273,7 @@ var module = (function() {
 
 module.facade({run: true, val:10});
 //outputs current value: 10, running
-[/cc]
+{% endhighlight %}
 
 在把它应用到我们架构中之前，外观模式就只有这些。下一步，我们会深入探讨一下中介者模式。中介者模式和外观模式的核心区别在于，外观模式（结构化模式）只能暴漏已经存在的功能，而中介者（行为模式）却可以添加功能。
 <div class="related-reading">相关阅读
@@ -304,7 +304,7 @@ module.facade({run: true, val:10});
 <div>中介者模式的缺点是：</div>
 由于有一个中介者，模块间只能间接的通信。这可能会带来很小的性能损失，同时，也很难只通过观察系统中的消息广播来了解系统的行为。
 <div>例子：这是中介者模式的一个可能实现，基于<a href="https://github.com/rpflorence" target="_blank">rpflorence</a>之前的工作</div>
-[cc lang="javascript"]
+{% highlight javascript %}
 var mediator = (function(){
   var subscribe = function(channel, fn){
     if (!mediator.channels[channel]) mediator.channels[channel] = [];
@@ -333,9 +333,9 @@ var mediator = (function(){
   };
 }());
 
-[/cc]
+{% endhighlight %}
 <div>例子：这是应用上面中介者实现的两个例子。</div>
-[cc lang="javascript"]
+{% highlight javascript %}
 
 //Pub/sub on a centralized mediator
 
@@ -360,7 +360,7 @@ obj.subscribe('nameChange', function(arg){
 
 obj.publish('nameChange', 'john'); //sam, john
 
-[/cc]
+{% endhighlight %}
 <div class="related-reading">相关阅读
 <ul>
 	<li>Stoyan Stefanov - Page 168, JavaScript Patterns</li>

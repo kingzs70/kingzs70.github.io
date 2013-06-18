@@ -34,7 +34,7 @@ comet长连接是在网站上实现消息推送的主流方式。本文介绍前
 <h3><strong>防止浏览器进入忙碌状态</strong></h3>
 <p>
 直接在页面中加载任何资源，浏览器都会进入忙碌状态（loading图标会一直转），直到获得响应或超时。解决方案仍然是使用iframe。并再iframe的onload时发起请求，代码大概如下：
-[cc lang="javascript"]
+{% highlight javascript %}
 var d = document，
 	cometFrame = d.body.appendChild(d.createElement('iframe'))，
 	doc = cometFrame.contentWindow.document，
@@ -48,7 +48,7 @@ var d = document，
 cometFrame.style.cssText = "position:absolute;width:1px;height:1px;left:-100px;top:-100px;";
 doc.open().write(content);
 doc.close();//触发onload事件。
-[/cc]
+{% endhighlight %}
 通过这种方式加载资源，浏览器不会进入忙碌状态。同时，也不需要单独创建一个iframe页面。更妙的是由于iframe是父页面自己创建的，所以iframe和父页面的js互操作没有任何限制。
 </p>
 <h3><strong>永远保持一条连接</strong></h3>
@@ -60,9 +60,9 @@ doc.close();//触发onload事件。
 parent.comet.callback0<br />
 parent.comet.callback1</p>
 <p>当我们发起第二个请求时，将浏览器端的回调函数名字改为callback1，这样即便第一响应返回了也没有回调函数可以用。为了js不报错，需要为jsonp响应套上一个try-catch,比如
-[cc lang="javascript"]
+{% highlight javascript %}
 try(parent.comet.callback1({...}))catch(e){}
-[/cc]
+{% endhighlight %}
 </p>
 
 <h3><strong>后记</strong></h3>

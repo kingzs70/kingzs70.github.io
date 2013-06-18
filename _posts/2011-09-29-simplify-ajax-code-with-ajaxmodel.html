@@ -26,10 +26,14 @@ meta:
 </p>
 <p>
 <h2>待重构的代码</h2>
-假设ajax响应格式为 [cc inline='true' lang='javascript']{ 'status':xx, 'msg':xx, 'data':xx }[/cc] status==0 代表成功，其他值代表错误代码。以<strong>“添加标签”</strong>为例，一种简单、直接、容易理解的实现方式，可能是这样：<br />
+假设ajax响应格式为 
+{% highlight javascript %}
+{ 'status':xx, 'msg':xx, 'data':xx }
+{% endhighlight %} 
+status==0 代表成功，其他值代表错误代码。以<strong>“添加标签”</strong>为例，一种简单、直接、容易理解的实现方式，可能是这样：<br />
 
 <span class='unimportent'>注：示例代码使用的是<a href='http://tangram.baidu.com'>tangram</a>框架。</span>
-[cc lang='javascript']
+{% highlight javascript %}
 T.event.on(T.dom.g('addTagBtn'), 'click', function(){
     var tagname = T.dom.g('tagNameInput').value;
     tagname = T.string.trim(tagname);
@@ -61,7 +65,7 @@ T.event.on(T.dom.g('addTagBtn'), 'click', function(){
         alert('请输入标签名');
     }
 });
-[/cc]
+{% endhighlight %}
 </p>
 <h2>以上代码的问题</h2>
 <p>
@@ -83,7 +87,7 @@ T.event.on(T.dom.g('addTagBtn'), 'click', function(){
 下面我们用AjaxModel重构上面的代码。
 </p>
 <h2>用AjaxModel重构后的代码</h2>
-[cc lang='javascript' highlight='7-9,27-34']
+{% highlight javascript %}
 //将所有事件处理函数组织在一起，
 //并统一命名为 on + ElementId + 事件名
 var eventHandlers = {
@@ -124,7 +128,7 @@ var tagModel = new AjaxModel({
 		g = T.g;
 	on(g('addTagBtn'),'click',eventHandlers.onAddTagBtnClick);
 })();
-[/cc]
+{% endhighlight %}
 <p>
 <strong>重构后的代码满足"单一职责"原则。</strong>我们可以按照其职责来命名对象或函数。良好的命名保证了代码的<strong>可读性</strong>。有位牛人曾说过：<strong>"一份可以直接阅读代码，远远胜过面面俱到的文档"</strong>。
 </p>
@@ -140,7 +144,7 @@ var tagModel = new AjaxModel({
 </blockquote>
 <p>
 为了实现这个需求。我们只需要在tagModel的定义中添加如下所示的高亮代码：
-[cc lang='javascript' highlight='2-7']
+{% highlight javascript %}
 var tagModel = new AjaxModel({
 	onRequestBegin : function () {
 		T.g('AjaxModelProcessing').style.visibility = 'visible';
@@ -155,9 +159,14 @@ var tagModel = new AjaxModel({
 		}
 	}
 });
-[/cc]
+{% endhighlight %}
 然后在html文件中“我的标签”后面以“AjaxModelProcessing”为id添加一个Ajax-loading图片。这就是你需要的全部改动，而且这些都是改动都是添加性的改动，对原有代码没有做任何修改。也就是面向对象中所谓的<strong>"向添加开发，向修改关闭"</strong>的<strong>开放关闭原则</strong>。由于loading图片是一个如此常用的功能，实际上AjaxModel已经对其进行了封装。你只需要在html文件内适合的位置插入一个图片就可以使用这个功能了。
-<p>二. 另一个好处就是代码可分层测试了。对于后端ajax接口的测试，只需测model对象。对于前端页面的测试，只要保证model有正确的行为，就可以只测试前端其他代码。进而带来的影响是<strong>前端和后端开发人员可以独立的进行自己的工作</strong>。假设后端工程师已经完成了服务端ajax接口的编程，而前端工程师还没有把页面写好。后端工程师只需要在站点下随便创建一个页面，在页面中定义一个tagModel对象。然后在firebug console中运行如下代码[cc inline='true' lang='javascript']tagModel.add({ tagname : 'kingzs70'})[/cc] 就可以测试接口是否正确。你也可以在示例页面中用firebug运行这行代码试试，看看"kingzs70"这个标签是否添加成功。相反，如果前端工程师先写好了页面，而后端接口还没有写好，他只需要用MockAjaxModel替换AjaxModel去测试自己的页面，等候后端接口开发后改回AjaxModel。这里的MockAjaxModel可以模拟AjaxModel的行为，但无需与服务器进行通信。这也是MVC框架分层测试中普遍采用的手段，用Mock对象模拟下层对象来对上层对象进行。如何定义MockAjaxModel的行为，就看测试的需求了。</p>
+<p>二. 另一个好处就是代码可分层测试了。对于后端ajax接口的测试，只需测model对象。对于前端页面的测试，只要保证model有正确的行为，就可以只测试前端其他代码。进而带来的影响是<strong>前端和后端开发人员可以独立的进行自己的工作</strong>。假设后端工程师已经完成了服务端ajax接口的编程，而前端工程师还没有把页面写好。后端工程师只需要在站点下随便创建一个页面，在页面中定义一个tagModel对象。然后在firebug console中运行如下代码
+
+{% highlight javascript %}
+tagModel.add({ tagname : 'kingzs70'})
+{% endhighlight %}
+就可以测试接口是否正确。你也可以在示例页面中用firebug运行这行代码试试，看看"kingzs70"这个标签是否添加成功。相反，如果前端工程师先写好了页面，而后端接口还没有写好，他只需要用MockAjaxModel替换AjaxModel去测试自己的页面，等候后端接口开发后改回AjaxModel。这里的MockAjaxModel可以模拟AjaxModel的行为，但无需与服务器进行通信。这也是MVC框架分层测试中普遍采用的手段，用Mock对象模拟下层对象来对上层对象进行。如何定义MockAjaxModel的行为，就看测试的需求了。</p>
 </p>
 <h2>后记</h2>
 <p>AjaxModel尝试解决的核心问题就是增加代码的可维护性。但“可维护性”与“性能”通常来说是矛盾的，增加可维护性，意味着牺牲一定的性能。tagModel在初始化时要消耗一定时间，同时也要占用一定的内存，但相对于它带来的<strong>“可维护性”</strong>方面的好处，这点牺牲是值得的。</p>
