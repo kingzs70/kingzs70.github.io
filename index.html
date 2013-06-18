@@ -6,7 +6,7 @@ title:  张帅 - 宁精勿杂，宁专勿多
 <div id="home">
   <ul class="posts">
     {% for post in site.posts %}
-      <li><h2><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></h2></li>
+      <li><h3><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></h3></li>
     {% endfor %}
   </ul>
 </div>
